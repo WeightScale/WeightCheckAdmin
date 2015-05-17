@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_height="wrap_content"
+              android:gravity="left|center"
+              android:paddingBottom="5dp"
+              android:paddingTop="5dp"
+              android:paddingLeft="5dp"
+              android:orientation="vertical"
+              android:layout_width="match_parent" android:background="@drawable/round_rectangle">
+    <TextView
+            style="?android:attr/dropDownItemStyle"
+            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:textSize="15sp"
+            android:id="@+id/topText"
+            android:ellipsize="marquee" android:gravity="left|top">
+    </TextView>
+    <TextView
+            android:layout_height="match_parent"
+            android:textSize="12sp"
+            android:layout_width="fill_parent"
+            android:id="@+id/bottomText">
+    </TextView>
+</LinearLayout>

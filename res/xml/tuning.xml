@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Калибровка">
+        <Preference android:title="Нулевой вес" android:summary="Калибровать нулевой вес" android:key="point1"/>
+        <EditTextPreference android:title="Контрольный вес" android:summary="Калибровать контрольный вес"
+                            android:key="point2" android:inputType="number"/>
+        <EditTextPreference android:title="Максимальный вес" android:summary="Установить максимальный вес"
+                            android:key="weightMax" android:inputType="number"/>
+        <EditTextPreference android:title="Коэффициент А" android:summary="Установлен коэффициент"
+                            android:key="coefficientA" android:inputType="numberDecimal"/>
+        <EditTextPreference android:title="Коэффициент B" android:summary="Установлен коэффициент"
+                            android:key="coefficientB" android:inputType="text"/>
+        <EditTextPreference android:title="Установить температуру" android:summary="Установлена температура"
+                            android:key="call_temp" android:inputType="number"/>
+        <EditTextPreference android:title="Батарея" android:summary="Процент заряда" android:key="call_battery"
+                            android:inputType="number"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Прочее">
+        <EditTextPreference android:title="Скорость передачи (1-5)" android:key="speed" android:inputType="number"/>
+        <EditTextPreference android:title="Фильтр АЦП (0-15)" android:key="filter" android:inputType="number"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Настройки Google Disc">
+        <EditTextPreference android:title="Таблица" android:summary="Имя таблици spreadsheet в Google drive "
+                            android:key="sheet" android:inputType="text"/>
+        <EditTextPreference android:title="Пользователь" android:summary="Account Google" android:key="name"
+                            android:inputType="textEmailAddress"/>
+        <EditTextPreference android:title="Пароль" android:summary="Password account Google" android:key="password"
+                            android:inputType="textPassword"/>
+    </PreferenceCategory>
+</PreferenceScreen>

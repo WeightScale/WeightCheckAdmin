@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content" android:padding="@dimen/padding">
+
+    <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:text="@string/Check_N"
+                android:id="@+id/textView" android:textColor="@color/text"
+                android:background="#cccccc" android:textSize="@dimen/text_small"/>
+        <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/check_id" android:gravity="center_vertical|center_horizontal"
+                android:textColor="@color/text" android:background="@android:color/white"
+                android:layout_toRightOf="@+id/textView" android:layout_marginLeft="1dp"
+                android:textSize="@dimen/text_small"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/date" android:text=""
+                android:textColor="@color/text" android:background="@android:color/white"
+                android:gravity="center_vertical|center_horizontal"
+                android:layout_alignBaseline="@+id/vendor" android:layout_alignBottom="@+id/vendor"
+                android:layout_toRightOf="@+id/check_id" android:layout_marginLeft="1dp"
+                android:textSize="@dimen/text_small"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/vendor" android:text=""
+                android:textColor="@color/text" android:background="@android:color/white"
+                android:gravity="center_vertical|center_horizontal" android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true" android:layout_toRightOf="@+id/date"
+                android:layout_marginLeft="1dp" android:textSize="@dimen/text_small"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/Tape"
+                  android:id="@+id/tare"
+                  android:textColor="@color/text"
+                  android:background="#cccccc"
+                  android:layout_gravity="left|center_vertical"
+                  android:layout_toRightOf="@+id/gross"
+                  android:layout_alignLeft="@+id/check_id" android:gravity="center_horizontal"
+                  android:layout_below="@+id/check_id"
+                  android:layout_toLeftOf="@+id/date" android:textSize="@dimen/text_small"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Gross"
+                android:id="@+id/gross"
+                android:textColor="@color/text"
+                android:background="#cccccc"
+                android:layout_gravity="center"
+                android:layout_below="@+id/textView"
+                android:layout_alignLeft="@+id/textView"
+                android:gravity="center_vertical|center_horizontal" android:layout_above="@+id/tare_row"
+                android:layout_toLeftOf="@+id/check_id" android:textSize="@dimen/text_small"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/Netto"
+                  android:id="@+id/netto"
+                  android:textColor="@color/text"
+                  android:background="#cccccc"
+                  android:layout_alignTop="@+id/tare"
+                  android:layout_below="@+id/date"
+                  android:gravity="center_horizontal" android:layout_above="@+id/netto_row"
+                  android:layout_toRightOf="@+id/check_id" android:layout_alignRight="@+id/date"
+                  android:layout_marginLeft="1dp" android:textSize="@dimen/text_small"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/Sum"
+                  android:id="@+id/sum"
+                  android:textColor="@color/text"
+                  android:background="#cccccc"
+                  android:gravity="center_horizontal"
+                  android:layout_below="@+id/vendor"
+                  android:layout_alignRight="@+id/vendor"
+                  android:layout_alignLeft="@+id/vendor" android:textSize="@dimen/text_small"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:id="@+id/gross_row"
+                  android:gravity="right" android:text=""
+                  android:textColor="@color/text" android:background="@android:color/white"
+                  android:layout_alignLeft="@+id/textView"
+                  android:layout_toLeftOf="@+id/check_id" android:layout_alignRight="@+id/textView"
+                  android:textStyle="italic" android:layout_alignBottom="@+id/netto_row"
+                  android:layout_alignTop="@+id/netto_row" android:textSize="@dimen/text_small"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:id="@+id/tare_row" android:text=""
+                  android:gravity="right"
+                  android:textColor="@color/text" android:background="@android:color/white"
+                  android:layout_toRightOf="@+id/textView" android:layout_below="@+id/tare"
+                  android:layout_alignRight="@+id/tare" android:layout_alignLeft="@+id/check_id"
+                  android:textStyle="italic"
+
+                  android:textSize="@dimen/text_small"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:id="@+id/netto_row"
+                  android:gravity="right" android:text=""
+                  android:textColor="@color/text" android:background="@android:color/white"
+                  android:layout_below="@+id/tare"
+                  android:textStyle="italic"
+                  android:layout_alignBottom="@+id/sum_row"
+                  android:layout_alignLeft="@+id/date" android:layout_alignRight="@+id/netto"
+                  android:textSize="@dimen/text_small"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:id="@+id/sum_row" android:text=""
+                  android:gravity="right"
+                  android:textColor="@color/text" android:background="@android:color/white"
+                  android:layout_below="@+id/tare"
+                  android:textStyle="italic"
+                  android:layout_alignRight="@+id/sum" android:layout_alignLeft="@+id/sum"
+                  android:textSize="@dimen/text_small"/>
+    </RelativeLayout>
+</LinearLayout>

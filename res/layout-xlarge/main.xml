@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent" android:background="@color/background_light"
+              android:padding="@dimen/padding">
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent" android:gravity="center" android:layout_weight="1"
+            android:background="@color/background2">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/buttonBootloader" android:src="@drawable/ic_refresh"
+                    style="@style/ButtonImageAdmin"
+                    />
+            <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/buttonScales" android:src="@drawable/scale_a" style="@style/ButtonImageAdmin"
+                    />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" android:background="@color/background2" android:gravity="right">
+        <ImageView
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonBack" android:src="@drawable/ic_action_back" style="@style/ButtonImageAdmin"/>
+    </LinearLayout>
+</LinearLayout>
