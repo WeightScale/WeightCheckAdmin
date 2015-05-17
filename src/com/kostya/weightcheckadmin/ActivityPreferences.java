@@ -284,15 +284,13 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
             });
         }
 
-
-        name = findPreference(KEY_ABOUT);
-        if (name != null) {
-            name.setSummary(getString(R.string.version) + Main.versionName + ' ' + Integer.toString(Main.versionNumber));
+        name = findPreference(KEY_ADMIN);
+        if (name != null){
             name.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    startActivity(new Intent().setClass(getApplicationContext(), ActivityAbout.class));
-                    return false;
+                    startActivity(new Intent().setClass(getApplicationContext(),ActivityTuning.class));
+                    return true;
                 }
             });
         }
@@ -306,11 +304,11 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                 } else {
                     name.setSummary(getString(R.string.Scale_update));
                     name.setEnabled(false);
-    }
+                }
 
                 name.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     //@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    @Override
+                    @Override
                     public boolean onPreferenceClick(Preference preference) {
                         //Scales.vScale.backupPreference();
                         String hardware = ScaleModule.getModuleHardware();
@@ -332,6 +330,20 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                 });
             }
         }
+
+        name = findPreference(KEY_ABOUT);
+        if (name != null) {
+            name.setSummary(getString(R.string.version) + Main.versionName + ' ' + Integer.toString(Main.versionNumber));
+            name.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    startActivity(new Intent().setClass(getApplicationContext(), ActivityAbout.class));
+                    return false;
+                }
+            });
+        }
+
+
     }
 
     @Override

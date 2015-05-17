@@ -19,7 +19,7 @@ public class Preferences {
     public static final String KEY_SENT_SERVICE = "sent_service";
 
     Preferences(Context context, String name) {
-        load(context.getSharedPreferences(name, Context.MODE_PRIVATE)); //загрузить настройки
+       load(context.getSharedPreferences(name, Context.MODE_PRIVATE)); //загрузить настройки
     }
 
     public static void load(SharedPreferences sp) {

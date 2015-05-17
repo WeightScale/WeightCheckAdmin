@@ -27,14 +27,14 @@
                         android:layout_height="fill_parent" android:id="@+id/linearSectionScale"
                         android:weightSum="1" android:gravity="bottom"
                         android:layout_alignParentBottom="true" android:layout_alignParentLeft="true">
-                    <com.victjava.scales.BatteryProgressBar
+                    <com.kostya.weightcheckadmin.BatteryProgressBar
                             style="@style/CustomBatteryProgressBar"
                             android:layout_height="match_parent"
                             android:id="@+id/progressBarBattery"
                             android:visibility="visible"
                             android:progress="100"
                             android:layout_margin="@dimen/padding" android:layout_width="wrap_content"/>
-                    <com.victjava.scales.TemperatureProgressBar
+                    <com.kostya.weightcheckadmin.TemperatureProgressBar
                             style="@style/CustomTemperatureProgressBar"
                             android:layout_width="@dimen/image_button_size"
                             android:layout_height="fill_parent"

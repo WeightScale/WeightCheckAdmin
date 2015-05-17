@@ -60,7 +60,7 @@ public class ActivityAdmin extends Activity implements OnClickListener {
                 break;
             case R.id.buttonScales:
                 Preferences.admin = true;
-                startActivity(new Intent(getBaseContext(), ActivitySearch.class).putExtra("bootloader", false));
+                startActivity(new Intent(getBaseContext(), ActivityScales.class).putExtra("bootloader", false));
                 finish();
                 break;
             case R.id.buttonBack:

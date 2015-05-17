@@ -365,7 +365,12 @@ public class ActivityScales extends Activity implements View.OnClickListener, Vi
     void connectBluetooth() {
 
         String define_device = Preferences.read(ActivityPreferences.KEY_LAST, "");
-        scaleModule.init(Main.versionName, define_device/*, msgHandler*/);
+
+        try {
+            scaleModule.init(Main.versionName, define_device/*, msgHandler*/);
+        } catch (Exception e) {
+            scaleModule.handleModuleConnectError(HandlerScaleConnect.Result.STATUS_CONNECT_ERROR, e.getMessage());
+        }
 
     }
 

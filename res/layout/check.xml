@@ -14,7 +14,7 @@
                       android:id="@+id/linearLayout"
                       android:layout_gravity="center" android:layout_margin="@dimen/padding"
                       android:orientation="horizontal">
-            <com.victjava.scales.WeightTextView
+            <com.kostya.weightcheckadmin.WeightTextView
                     style="@style/CustomWeightTextView"
                     android:layout_width="fill_parent"
                     android:layout_height="@dimen/text_big"
