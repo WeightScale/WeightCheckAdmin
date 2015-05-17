@@ -2,6 +2,7 @@ package com.kostya.weightcheckadmin;
 
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
@@ -11,36 +12,43 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.*;
 import android.widget.*;
+import com.kostya.weightcheckadmin.R;
+import com.kostya.weightcheckadmin.TaskMessageDialog;
+import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
 
 import java.util.Map;
 
 public class ActivityPageChecks extends Activity {
 
-    //Dialog dialog;
+    CheckDBAdapter checkTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        checkTable = new CheckDBAdapter(this);
         int pos = getIntent().getIntExtra("position", 0);
         //long checkId = getIntent().getIntExtra("id", 1);
-        setTitle(getString(R.string.app_name) + ' ' + "Чек"); //установить заголовок*/
+        setTitle(getString(R.string.app_name) + ' ' + getString(R.string.Check)); //установить заголовок*/
 
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.screenBrightness = 1.0f;
         getWindow().setAttributes(lp);
 
-        String[] columns = {
-                CheckDBAdapter.KEY_ID,
+        String[] columns = {CheckDBAdapter.KEY_ID,
                 CheckDBAdapter.KEY_DATE_CREATE,
                 CheckDBAdapter.KEY_TIME_CREATE,
                 CheckDBAdapter.KEY_VENDOR,
-                CheckDBAdapter.KEY_WEIGHT_GROSS,
-                CheckDBAdapter.KEY_WEIGHT_TARE,
+                CheckDBAdapter.KEY_WEIGHT_FIRST,
+                CheckDBAdapter.KEY_WEIGHT_SECOND,
                 CheckDBAdapter.KEY_WEIGHT_NETTO,
                 CheckDBAdapter.KEY_TYPE,
                 CheckDBAdapter.KEY_PRICE,
-                CheckDBAdapter.KEY_PRICE_SUM};
+                CheckDBAdapter.KEY_PRICE_SUM,
+                CheckDBAdapter.KEY_NUMBER_BT,
+                CheckDBAdapter.KEY_DIRECT,
+                CheckDBAdapter.KEY_DIRECT,
+                CheckDBAdapter.KEY_DIRECT};
 
         int[] to = {
                 R.id.check_id,
@@ -52,33 +60,35 @@ public class ActivityPageChecks extends Activity {
                 R.id.netto_row,
                 R.id.type_row,
                 R.id.price_row,
-                R.id.sum_row};
-        Cursor cursor = new CheckDBAdapter(getApplicationContext()).getAllEntries(CheckDBAdapter.VISIBLE);
-        //ContentQueryMap mQueryMap = new ContentQueryMap(cursor, BaseColumns._ID, true, null);
-        //Map<String,ContentValues> map = mQueryMap.getRows();
-        MyAdapter myAdapter = new MyAdapter(getApplicationContext(), R.layout.page_checks, cursor, columns, to);
+                R.id.sum_row,
+                R.id.textNumScale,
+                R.id.imageDirect, R.id.gross, R.id.tare};
+        Cursor cursor = checkTable.getAllEntries(CheckDBAdapter.VISIBLE);
+        if (cursor == null) {
+            return;
+        }
+        MyAdapter myAdapter = new MyAdapter(/*getApplicationContext(),*/  cursor, columns, to);
         ViewPager pager = new ViewPager(this);
+        myAdapter.setViewBinder(new PageCheckViewBinder());
         pager.setAdapter(myAdapter);
         pager.setCurrentItem(pos);
         setContentView(pager);
-
-
     }
 
-    private class MyAdapter extends PagerAdapter {
-        final Context context;
-        View mCurrentView;
+    private class MyAdapter extends PagerAdapter implements View.OnClickListener {
+        //private final Context context;
+        private View mCurrentView;
         private final Cursor mCursor;
-        final int count;
-        final int layout;
-        final String[] mColumns;
-        final int[] mTo;
-        protected int[] mFrom;
+        private final int count;
+        private final int layout;
+        private final String[] mColumns;
+        private final int[] mTo;
+        private int[] mFrom;
         private SimpleCursorAdapter.ViewBinder mViewBinder;
 
-        public MyAdapter(Context context, int layout, Cursor cursor, String[] columns, int... to) {
-            this.context = context;
-            this.layout = layout;
+        public MyAdapter(/*Context context,*/  Cursor cursor, String[] columns, int... to) {
+            //this.context = context;
+            layout = R.layout.page_checks;
             mColumns = columns;
             mTo = to;
             mCursor = cursor;
@@ -92,14 +102,12 @@ public class ActivityPageChecks extends Activity {
             position %= mCursor.getCount();
             mCursor.moveToPosition(position);
             View view = inflater.inflate(layout, null);
-            LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.layoutImageView);
-            linearLayout.setVisibility(View.VISIBLE);
-            ImageView imageViewBack = (ImageView) view.findViewById(R.id.imageViewBack);
-            imageViewBack.setOnClickListener(onClickListener);
-            ImageView imageViewMail = (ImageView) view.findViewById(R.id.imageViewMail);
-            imageViewMail.setOnClickListener(onClickListener);
-            ImageView imageViewMessage = (ImageView) view.findViewById(R.id.imageViewMessage);
-            imageViewMessage.setOnClickListener(onClickListener);
+            //LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.layoutImageView);
+            //linearLayout.setVisibility(View.VISIBLE);
+            ((TextView) view.findViewById(R.id.textNumTerminal)).setText(BluetoothAdapter.getDefaultAdapter().getAddress());
+            view.findViewById(R.id.imageViewBack).setOnClickListener(this);
+            view.findViewById(R.id.imageViewMail).setOnClickListener(this);
+            view.findViewById(R.id.imageViewMessage).setOnClickListener(this);
             bindView(view, mCursor);
             container.addView(view);
             return view;
@@ -135,7 +143,7 @@ public class ActivityPageChecks extends Activity {
             }
         }
 
-        public void setViewText(TextView v, String text) {
+        public void setViewText(TextView v, CharSequence text) {
             v.setText(text);
         }
 
@@ -185,32 +193,92 @@ public class ActivityPageChecks extends Activity {
             }
         }
 
-        final View.OnClickListener onClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCurrentView == null)
-                    return;
-                Cursor cursor = mCursor;
-                ContentQueryMap mQueryMap = new ContentQueryMap(cursor, BaseColumns._ID, true, null);
-                Map<String, ContentValues> map = mQueryMap.getRows();
-                TextView textView = (TextView) mCurrentView.findViewById(R.id.check_id);
-                String checkId = textView.getText().toString();
-                ContentValues values = map.get(checkId);
-                String contactId = values.getAsString(CheckDBAdapter.KEY_VENDOR_ID);
-                switch (v.getId()) {
-                    case R.id.imageViewBack:
-                        onBackPressed();
-                        break;
-                    case R.id.imageViewMail:
-                        if (contactId != null)
-                            new TaskMessageDialog(ActivityPageChecks.this, Integer.valueOf(contactId), Integer.valueOf(checkId)).openListEmailDialog();
-                        break;
-                    case R.id.imageViewMessage:
-                        if (contactId != null)
-                            new TaskMessageDialog(ActivityPageChecks.this, Integer.valueOf(contactId), Integer.valueOf(checkId)).openListPhoneDialog();
-                        break;
+        @Override
+        public void onClick(View v) {
+            if (mCurrentView == null) {
+                return;
+            }
+            Cursor cursor = mCursor;
+            ContentQueryMap mQueryMap = new ContentQueryMap(cursor, BaseColumns._ID, true, null);
+            Map<String, ContentValues> map = mQueryMap.getRows();
+            TextView textView = (TextView) mCurrentView.findViewById(R.id.check_id);
+            String checkId = textView.getText().toString();
+            ContentValues values = map.get(checkId);
+            String contactId = values.getAsString(CheckDBAdapter.KEY_VENDOR_ID);
+            switch (v.getId()) {
+                case R.id.imageViewBack:
+                    onBackPressed();
+                    break;
+                case R.id.imageViewMail:
+                    if (contactId != null) {
+                        new TaskMessageDialog(ActivityPageChecks.this, Integer.valueOf(contactId), Integer.valueOf(checkId)).openListEmailDialog();
+                    }
+                    break;
+                case R.id.imageViewMessage:
+                    if (contactId != null) {
+                        new TaskMessageDialog(ActivityPageChecks.this, Integer.valueOf(contactId), Integer.valueOf(checkId)).openListPhoneDialog();
+                    }
+                    break;
+            }
+        }
+    }
+
+    private class PageCheckViewBinder implements SimpleCursorAdapter.ViewBinder {
+        private int direct;
+
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+
+            switch (view.getId()) {
+                case R.id.gross:
+                    direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
+                    if (direct == CheckDBAdapter.DIRECT_UP) {
+                        setViewText((TextView) view, getString(R.string.Tape));
+                    } else {
+                        setViewText((TextView) view, getString(R.string.Gross));
+                    }
+                    break;
+                case R.id.tare:
+                    direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
+                    if (direct == CheckDBAdapter.DIRECT_DOWN) {
+                        setViewText((TextView) view, getString(R.string.Tape));
+                    } else {
+                        setViewText((TextView) view, getString(R.string.Gross));
+                    }
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+
+            /*if(view.getId() == R.id.gross){
+                direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
+                if(direct == CheckDBAdapter.DIRECT_UP){
+                    //((TextView)view).setText(R.string.Tape);
+                    setViewText((TextView) view, getString(R.string.Tape));
+                    return true;
+                }else {
+                    //((TextView)view).setText(R.string.Gross);
+                    setViewText((TextView) view, getString(R.string.Gross));
+                    return true;
+                }
+            }else  if (view.getId() == R.id.tare){
+                direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
+                if(direct == CheckDBAdapter.DIRECT_DOWN){
+                    //((TextView)view).setText(R.string.Tape);
+                    setViewText((TextView) view, getString(R.string.Tape));
+                    return true;
+                }else {
+                    //((TextView)view).setText(R.string.Gross);
+                    setViewText((TextView) view, getString(R.string.Gross));
+                    return true;
                 }
             }
-        };
+            return false;*/
+        }
+
+        public void setViewText(TextView v, CharSequence text) {
+            v.setText(text);
+        }
     }
 }

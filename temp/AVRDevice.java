@@ -1,4 +1,4 @@
-package com.kostya.bootloader;
+package com.kostya.weightcheckadmin.bootloader;
 
 
 import android.content.Context;

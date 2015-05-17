@@ -11,7 +11,7 @@
             android:padding="@dimen/padding">
         <TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/textView1"
                   android:gravity="center_horizontal" android:background="@drawable/round_rectangle"
-                  android:singleLine="false" android:text="@string/file_load" android:textColor="@color/text"/>
+                  android:singleLine="false" android:text="файлы" android:textColor="@color/text"/>
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="fill_parent"

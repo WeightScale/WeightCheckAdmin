@@ -1,5 +1,7 @@
 package com.kostya.weightcheckadmin;
 
+import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
+
 /*
  * Created by Kostya on 30.11.2014.
  */

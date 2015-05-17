@@ -15,19 +15,11 @@ import android.widget.ProgressBar;
  */
 public class TemperatureProgressBar extends ProgressBar {
     private String text = "";
-    private int textColor = Color.BLACK;
+    private int textColor = Color.WHITE;
     private float textSize = getResources().getDimension(R.dimen.text_small);
     private final Paint textPaint;
     private final Rect bounds;
     private int mMinus;
-
-    /*public TemperatureProgressBar(Context context, int minus) {
-        super(context);
-        textPaint = new Paint();
-        textPaint.setAntiAlias(true);
-        textPaint.setTextSize(textSize);
-        this.mMinus = minus;
-    }*/
 
     public TemperatureProgressBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,20 +33,11 @@ public class TemperatureProgressBar extends ProgressBar {
     }
 
     public synchronized void updateProgress(int temperature) {
-
         setProgress(0);
-
-        /*if(progress > 15) {
-            if(progress < 50)
-                this.setTextColor(Color.WHITE);
-            else
-                this.setTextColor(Color.BLACK);
-            this.setProgressDrawable(getResources().getDrawable(R.drawable.battery));
-        }else {
-            this.setTextColor(Color.WHITE);
-            this.setProgressDrawable(getResources().getDrawable(R.drawable.battery_discharged));
-        }*/
+        if (temperature > -40)
         setText(String.valueOf(temperature));
+        else
+            setText("-");
         setProgress(temperature + mMinus);
         drawableStateChanged();
     }
@@ -72,8 +55,9 @@ public class TemperatureProgressBar extends ProgressBar {
         textPaint.getTextBounds(text, 0, text.length(), bounds);
         int x = 5;
         x -= bounds.left;
-        int y = 5;
-        y -= bounds.top;
+        //int y = 5;
+        //y -= bounds.top;
+        int y = getHeight() / 2 - bounds.centerY();
         canvas.drawText(text, x, y, textPaint);
     }
 
@@ -86,7 +70,7 @@ public class TemperatureProgressBar extends ProgressBar {
         if (attrs != null) {
             TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.TextProgressBar, 0, 0);
             setText(a.getString(R.styleable.TextProgressBar_text));
-            setTextColor(a.getColor(R.styleable.TextProgressBar_textColor, Color.BLACK));
+            setTextColor(a.getColor(R.styleable.TextProgressBar_textColor, Color.WHITE));
             setTextSize(a.getDimension(R.styleable.TextProgressBar_textSize, getResources().getDimension(R.dimen.text_small)));
             mMinus = a.getInteger(R.styleable.TextProgressBar_offSet, 40);
             a.recycle();

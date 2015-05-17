@@ -1,105 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="oad_theme" parent="android:Theme">
-        <!--<item name="android:windowTitleSize">48.0dip</item>-->
-        <item name="android:topLeftRadius">10dp</item>
-    </style>
-    <style name="LargeTitleTheme">
-        <item name="android:windowTitleSize">30dip</item>
-        <item name="android:windowTitleStyle">@style/titleTextStyle</item>
-    </style>
     <style name="titleTextStyle">
         <item name="android:singleLine">true</item>
         <item name="android:textAppearance">@style/TextAppearanceWindowTitle</item>
         <item name="android:shadowColor">#BB000000</item>
         <item name="android:shadowRadius">2.75</item>
+    </style>
 
-    </style>
-    <style name="myBackgroundStyle" parent="@android:style/Theme.Dialog">
-        <item name="android:background">#FF0000</item>
-    </style>
-    <style name="AlertDialogCustom" parent="@android:style/Theme.Dialog">
-        <item name="android:textColor">#00FF00</item>
-        <item name="android:textSize">15sp</item>
-    </style>
-    <style name="Radius">
-        <item name="android:radius">10sp</item>
-    </style>
     <style name="Preferences.white" parent="android:Theme.Light.NoTitleBar">
     </style>
+
     <style name="CustomImageButton">
         <item name="android:background">@drawable/design</item>
         <item name="android:textColor">@color/text</item>
         <item name="android:gravity">center</item>
     </style>
+
     <style name="CustomButton">
         <item name="android:background">@drawable/design</item>
         <item name="android:textColor">@color/text</item>
         <item name="android:gravity">center</item>
     </style>
-    <style name="CustomButton1">
-        <item name="android:background">@drawable/design1</item>
-        <item name="android:textColor">@drawable/text_button_selector</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textStyle">bold</item>
-    </style>
+
     <style name="CustomSpinner" parent="android:Widget.Spinner">
-        <item name="android:background">@drawable/spinner_background_ab</item>
+        <item name="android:background">@drawable/round_rectangle_w</item>
         <item name="android:clickable">true</item>
-    </style>
-
-    <style name="CustomAlertDialogStyle" parent="android:Theme.Dialog"><!--parent="android:Theme.Panel"-->
-        <!--
-                <item name="android:bottomBright">@color/dialog</item>
-                <item name="android:bottomDark">@color/dialog</item>
-                <item name="android:bottomMedium">@color/dialog</item>
-                <item name="android:centerBright">@color/dialog</item>
-                <item name="android:centerDark">@color/dialog</item>
-                <item name="android:centerMedium">@color/dialog</item>
-                <item name="android:fullBright">@color/dialog</item>
-                <item name="android:fullDark">@color/dialog</item>
-                <item name="android:topBright">@color/dialog</item>
-                <item name="android:topDark">@color/dialog</item>
-        -->
-        <item name="android:textColorPrimary">@color/text</item>
-        <!--<item name="android:panelColorForeground">@color/dialog</item>-->
-        <item name="android:background">@android:color/darker_gray</item>
-        <item name="android:textColorSecondary">@color/text</item>
-        <!--<item name="android:panelFullBackground">@color/dialog</item>-->
-        <item name="android:panelBackground">@color/dialog</item>
-    </style>
-
-    <style name="CustomWindowTitleText" parent="android:TextAppearance.WindowTitle">
-        <item name="android:textSize">40sp</item>
-        <item name="android:textColor">#5599FF</item>
-        <item name="android:textStyle">bold|italic</item>
-    </style>
-    <!-- Changes the background color of the title bar -->
-    <style name="CustomWindowTitleBackground">
-        <item name="android:background">#222222</item>
     </style>
 
     <style name="TextAppearanceWindowTitle">
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">@dimen/text_small</item>
         <item name="android:textStyle">normal</item>
-    </style>
-
-    <!-- Set the theme for the window title -->
-    <!-- NOTE: setting android:textAppearence to style defined above -->
-    <style name="CustomWindowTitle">
-        <item name="android:textAppearance">@style/TextAppearanceWindowTitle</item>
-        <item name="android:shadowDx">0</item>
-        <item name="android:shadowDy">0</item>
-        <item name="android:shadowRadius">5</item>
-        <item name="android:shadowColor">#1155CC</item>
-    </style>
-    <!-- Override properties in the default theme -->
-    <!-- NOTE: you must explicitly the windowTitleSize property, the title bar will not re-size automatically, text will be clipped -->
-    <style name="CustomTheme" parent="android:Theme">
-        <item name="android:windowTitleSize">40dip</item>
-        <item name="android:windowTitleStyle">@style/CustomWindowTitle</item>
-        <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item>
     </style>
 
     <style name="CustomWeightTextView">

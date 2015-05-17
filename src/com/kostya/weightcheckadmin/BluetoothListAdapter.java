@@ -34,8 +34,9 @@ class BluetoothListAdapter extends ArrayAdapter<BluetoothDevice> {
             v = vi.inflate(R.layout.list_item_bluetooth, parent, false);
         }
 
-        if (v == null)
+        if (v == null) {
             return null;
+        }
         BluetoothDevice o = items.get(position);
         if (o != null) {
             TextView tt = (TextView) v.findViewById(R.id.topText);
@@ -43,16 +44,20 @@ class BluetoothListAdapter extends ArrayAdapter<BluetoothDevice> {
             //LinearLayout linearLayout = (LinearLayout)v.findViewById(R.id.layout_item_bluetooth);
             /*if(position == 0)
                 linearLayout.setBackgroundResource(R.color.background_light);*/
-            if (tt != null)
+            if (tt != null) {
                 tt.setText(o.getName());
+            }
             if (bt != null) {
                 String address = o.getAddress();
-                if (tt != null)
-                    if (address.equalsIgnoreCase("-"))
+                if (tt != null) {
+                    if ("-".equalsIgnoreCase(address)) {
                         tt.setTextColor(0xFFFF5050);
-                    else
+                    } else
                         //tt.setTextColor(getContext().getResources().getColor(R.color.tt_item_bt));
+                    {
                         tt.setTextColor(getContext().getResources().getColor(R.color.white));
+                    }
+                }
                 bt.setText(address);
             }
         }
@@ -64,21 +69,3 @@ class BluetoothListAdapter extends ArrayAdapter<BluetoothDevice> {
         super.add(object);
     }
 }
-
-/*class DeviceDescriptor{
-    private final String Name;
-	private final String Address;
-
-	public DeviceDescriptor(String name, String address){
-		Name = name;
-		Address = address;
-	}
-
-	public String getName(){
-		return Name;
-	}
-
-	public String getAddress(){
-		return Address;
-	}
-}*/

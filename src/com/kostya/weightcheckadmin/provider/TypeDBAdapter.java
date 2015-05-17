@@ -1,13 +1,15 @@
-package com.kostya.weightcheckadmin;
+package com.kostya.weightcheckadmin.provider;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 //import android.content.res.Resources;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
-//import android.database.sqlite.SQLiteOpenHelper;
+import com.kostya.weightcheckadmin.R;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,7 +18,7 @@ import android.provider.BaseColumns;
  * Time: 12:27
  * To change this template use File | Settings | File Templates.
  */
-class TypeDBAdapter {
+public class TypeDBAdapter {
     private final Context context;
     public static final String TABLE_TYPE = "typeTable";
 
@@ -32,59 +34,72 @@ class TypeDBAdapter {
             + KEY_PRICE + " integer, "
             + KEY_SYS + " integer );";
 
-    static final String TABLE_TYPE_PATH = TABLE_TYPE;
-    private static final Uri TABLE_TYPE_CONTENT_URI = Uri.parse("content://" + WeightCheckBaseProvider.AUTHORITY + '/' + TABLE_TYPE_PATH);
+    //static final String TABLE_TYPE_PATH = TABLE_TYPE;
+    private static final Uri CONTENT_URI = Uri.parse("content://" + WeightCheckBaseProvider.AUTHORITY + '/' + TABLE_TYPE);
 
     public TypeDBAdapter(Context cnt) {
         context = cnt;
     }
 
     private int getKeyInt(int _rowIndex, String key) {
-        Uri uri = ContentUris.withAppendedId(TABLE_TYPE_CONTENT_URI, _rowIndex);
-        if (uri == null)
-            return -1;
+        Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
+        try {
         Cursor result = context.getContentResolver().query(uri, new String[]{KEY_ID, key}, null, null, null);
-        if (result == null)
-            return -1;
-        if (result.getCount() == 0 || !result.moveToFirst()) {
-            result.close();
-            return -1;
+            int in = -1;
+            if (result.getCount() > 0) {
+                result.moveToFirst();
+                in = result.getInt(result.getColumnIndex(key));
         }
-        int in = result.getInt(result.getColumnIndex(key));
         result.close();
         return in;
+        }catch (Exception e){return -1;}
     }
 
-    int getPriceColumn(int _rowIndex) {
+    public int getPriceColumn(int _rowIndex) {
         return getKeyInt(_rowIndex, KEY_PRICE);
     }
 
     public Cursor getAllEntries() {
-        return context.getContentResolver().query(TABLE_TYPE_CONTENT_URI, new String[]{KEY_ID, KEY_TYPE}, null, null, null);
+        return context.getContentResolver().query(CONTENT_URI, new String[]{KEY_ID, KEY_TYPE}, null, null, null);
     }
 
     public Cursor getNotSystemEntries() {
-        return context.getContentResolver().query(TABLE_TYPE_CONTENT_URI, new String[]{KEY_ID, KEY_TYPE}, KEY_SYS + "= 0" + " OR " + KEY_SYS + " IS NULL ", null, null);
+        return context.getContentResolver().query(CONTENT_URI, new String[]{KEY_ID, KEY_TYPE}, KEY_SYS + "= 0" + " OR " + KEY_SYS + " IS NULL ", null, null);
     }
 
-    Uri insertEntryType(String name) {
+    public Uri insertEntryType(String name) {
         ContentValues newTaskValues = new ContentValues();
         newTaskValues.put(KEY_TYPE, name);
         newTaskValues.put(KEY_SYS, 0);
-        return context.getContentResolver().insert(TABLE_TYPE_CONTENT_URI, newTaskValues);
+        return context.getContentResolver().insert(CONTENT_URI, newTaskValues);
     }
 
     public boolean removeEntry(int _rowIndex) {
-        Uri uri = ContentUris.withAppendedId(TABLE_TYPE_CONTENT_URI, _rowIndex);
+        Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
         return uri != null && context.getContentResolver().delete(uri, null, null) > 0;
     }
 
     public boolean updateEntry(int _rowIndex, String key, int in) {
-        Uri uri = ContentUris.withAppendedId(TABLE_TYPE_CONTENT_URI, _rowIndex);
-        if (uri == null)
-            return false;
+        Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
+        try {
         ContentValues newValues = new ContentValues();
         newValues.put(key, in);
         return context.getContentResolver().update(uri, newValues, null, null) > 0;
+        }catch (Exception e){return false;}
+
+    }
+
+    public void addSystemRow(SQLiteDatabase db) {
+        ContentValues contentValues = new ContentValues();
+        Resources res = context.getResources();
+        contentValues.put(KEY_TYPE, "тест");
+        contentValues.put(KEY_SYS, 1);
+        db.insert(TABLE_TYPE, null, contentValues);
+        String[] type_records = res.getStringArray(R.array.type_array);
+        for (String type_record : type_records) {
+            contentValues.put(KEY_TYPE, type_record);
+            contentValues.put(KEY_SYS, 0);
+            db.insert(TABLE_TYPE, null, contentValues);
+        }
     }
 }

@@ -7,43 +7,35 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-//import android.preference.PreferenceManager;
 import android.widget.Toast;
+import com.konst.module.ScaleModule;
+import com.konst.module.Versions;
+
+//import android.preference.PreferenceManager;
 
 public class ActivityTuning extends PreferenceActivity {
     private final Point point1 = new Point(Integer.MIN_VALUE, 0);
     private final Point point2 = new Point(Integer.MIN_VALUE, 0);
-    private boolean flag_restore = false;
+    private boolean flag_restore;
     //boolean flag_change = false;
-
-    final String KEY_POINT1 = "point1";
-    final String KEY_POINT2 = "point2";
-    final String KEY_WEIGHT_MAX = "weightMax";
-    final String KEY_SPEED = "speed";
-    final String KEY_FILTER = "filter";
-    final String KEY_COEFFICIENT_A = "coefficientA";
-    final String KEY_CALL_BATTERY = "call_battery";
-    final String KEY_CALL_TEMP = "call_temp";
-    final String KEY_SHEET = "sheet";
-    final String KEY_NAME = "name";
-    final String KEY_PASSWORD = "password";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.tuning);
+        String KEY_POINT1 = "point1";
         Preference name = findPreference(KEY_POINT1);
         if (name != null) {
             name.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    String str = Scales.command(ScaleInterface.CMD_SENSOR);
-                    if (str.equals("")) {
+                    String str = ScaleModule.getModuleSensor();
+                    if (str.isEmpty()) {
                         Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
                     //Scales.sensor=Integer.valueOf(str);
-                    point1.x = Scales.sensorTenzo = Integer.valueOf(str);
+                    point1.x = Versions.sensorTenzo = Integer.valueOf(str);
                     point1.y = 0;
                     Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                     flag_restore = true;
@@ -52,16 +44,17 @@ public class ActivityTuning extends PreferenceActivity {
             });
         }
         if (name != null) {
+            String KEY_POINT2 = "point2";
             name = findPreference(KEY_POINT2);
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    String str = Scales.command(ScaleInterface.CMD_SENSOR);
-                    if (str.equals("")) {
+                    String str = ScaleModule.getModuleSensor();
+                    if (str.isEmpty()) {
                         Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
-                    point2.x = Scales.sensorTenzo = Integer.valueOf(str);
+                    point2.x = Versions.sensorTenzo = Integer.valueOf(str);
                     point2.y = Integer.valueOf(o.toString());
                     Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                     flag_restore = true;
@@ -70,28 +63,28 @@ public class ActivityTuning extends PreferenceActivity {
             });
         }
         if (name != null) {
+            String KEY_WEIGHT_MAX = "weightMax";
             name = findPreference(KEY_WEIGHT_MAX);
-            name.setSummary("Предельный вес весов " + String.valueOf(Scales.weightMax) + "кг");
+            name.setTitle(getString(R.string.Max_weight) + Versions.weightMax + getString(R.string.scales_kg));
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("") || Integer.valueOf(o.toString()) < 1000) {
+                    if (o.toString().isEmpty() || Integer.valueOf(o.toString()) < Main.default_max_weight) {
                         Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
-                    Scales.weightMax = Integer.valueOf(o.toString());
-                    Scales.weightMargin = (int) (Scales.weightMax * 1.2);
-                    Scales.weightError = (int) (Scales.weightMax * 0.001);
-                    preference.setSummary("Предельный вес весов " + String.valueOf(Scales.weightMax) + "кг");
+                    Versions.weightMax = Integer.valueOf(o.toString());
+                    Versions.weightMargin = (int) (Versions.weightMax * 1.2);
+                    preference.setTitle(getString(R.string.Max_weight) + Versions.weightMax + getString(R.string.scales_kg));
                     Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                     flag_restore = true;
                     return true;
                 }
             });
         }
-        if (name != null) {
-            name = findPreference(KEY_SPEED);
-            name.setSummary(String.valueOf(Scales.speed));
+        /*if (name != null) {
+            name = findPreference("speed");
+            name.setSummary(String.valueOf(ScaleModule.getModuleSpeedPort()));
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
@@ -111,59 +104,40 @@ public class ActivityTuning extends PreferenceActivity {
                     return false;
                 }
             });
-        }
+        }*/
         if (name != null) {
-            name = findPreference(KEY_FILTER);
-            name.setSummary("Фильтер АЦП " + String.valueOf(Scales.filter) + " чем больше число тем точнее, но медленей измерения.");
-            name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("") || Integer.valueOf(o.toString()) > 15) {
-                        Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    if (Scales.command(ScaleInterface.CMD_FILTER + o.toString()).equals(ScaleInterface.CMD_FILTER)) {
-                        Scales.filter = Integer.valueOf(o.toString());
-                        preference.setSummary("Фильтер АЦП " + String.valueOf(Scales.filter) + " чем больше число тем точнее, но медленей измерения.");
-                        Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });
-        }
-        if (name != null) {
+            String KEY_COEFFICIENT_A = "coefficientA";
             name = findPreference(KEY_COEFFICIENT_A);
-            name.setSummary("Установлен коэффициент " + Float.toString(Scales.coefficientA));
+            name.setTitle(getString(R.string.ConstantA) + Float.toString(Versions.coefficientA));
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("") || !Scales.isFloat(o.toString())) {
-                        Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    Scales.coefficientA = Float.valueOf(o.toString());
-                    preference.setSummary(o.toString());
+                    try {
+                        Versions.coefficientA = Float.valueOf(o.toString());
+                        preference.setTitle(getString(R.string.ConstantA) + Float.toString(Versions.coefficientA));
                     Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                     flag_restore = true;
                     return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
                 }
             });
         }
         if (name != null) {
+            String KEY_CALL_BATTERY = "call_battery";
             name = findPreference(KEY_CALL_BATTERY);
-            name.setSummary("Установка процента заряда ");
+            name.setTitle(getString(R.string.Battery) + ScaleModule.battery + '%');
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("") || o.toString().equals("0") || Integer.valueOf(o.toString()) > 99) {
+                    if (o.toString().isEmpty() || "0".equals(o.toString()) || Integer.valueOf(o.toString()) > Main.default_max_battery) {
                         Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
-                    if (Scales.command(ScaleInterface.CMD_CALL_BATTERY + o.toString()).equals(ScaleInterface.CMD_CALL_BATTERY)) {
-                        Scales.battery = Integer.valueOf(o.toString());
-                        preference.setSummary(o.toString());
+                    if (ScaleModule.setModuleBatteryCharge(0)) {
+                        ScaleModule.battery = Integer.valueOf(o.toString());
+                        preference.setTitle(getString(R.string.Battery) + ScaleModule.battery + '%');
                         Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                         return true;
                     }
@@ -174,58 +148,24 @@ public class ActivityTuning extends PreferenceActivity {
             });
         }
         if (name != null) {
-            name = findPreference(KEY_CALL_TEMP);
-            name.setSummary("Установка температуры ");
-            name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("") || o.toString().equals("0") || Integer.valueOf(o.toString()) > 99) {
-                        Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-
-                    /*String str = Scales.command(ScaleInterface.CMD_DATA_TEMP);
-                    if(str.isEmpty()){
-                        Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    float temp = (float)((float)((Integer.valueOf(str) - 0x800000) / 7169) / 0.81)-273;*/
-                    //temp -= 273;
-
-                    //Scales.temp = Integer.valueOf(o.toString());
-                    //Scales.temp = Integer.valueOf(o.toString());
-                    //Scales.coefficient_temp = (float) Scales.temp / Float.valueOf(str);//Float.valueOf((float)Scales.temp / (float)Integer.valueOf(str));
-                    Scales.getTemp();
-                    if (Scales.command(ScaleInterface.CMD_CALL_TEMP + String.valueOf(Scales.coefficientTemp)).equals(ScaleInterface.CMD_CALL_TEMP)) {
-                        //preference.setSummary(o.toString());
-                        preference.setSummary(String.valueOf(Scales.temp) + "\u00b0" + "C");
-                        Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-
-                    Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            });
-        }
-        if (name != null) {
+            String KEY_SHEET = "sheet";
             name = findPreference(KEY_SHEET);
-            name.setTitle("Таблица: " + "\"" + Scales.spreadsheet + "\"");
-            name.setSummary("Имя таблици spreadsheet в Google drive ");
+            name.setTitle(getString(R.string.Table) + '"' + Versions.spreadsheet + '"');
+            name.setSummary(getString(R.string.TEXT_MESSAGE7));
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("")) {
+                    if (o.toString().isEmpty()) {
                         Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
-                    if (Scales.command(ScaleInterface.CMD_SPREADSHEET + String.valueOf(o.toString())).equals(ScaleInterface.CMD_SPREADSHEET)) {
-                        preference.setTitle("Таблица: " + "\"" + o.toString() + "\"");
-                        Scales.spreadsheet = o.toString();
+                    if (ScaleModule.setSpreadsheet(o.toString())) {
+                        preference.setTitle(getString(R.string.Table) + '"' + o + '"');
+                        Versions.spreadsheet = o.toString();
                         Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                         return true;
                     }
-                    preference.setTitle("Таблица: ???");
+                    preference.setTitle(getString(R.string.Table) + "???");
                     Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
 
                     return false;
@@ -233,18 +173,19 @@ public class ActivityTuning extends PreferenceActivity {
             });
         }
         if (name != null) {
+            String KEY_NAME = "name";
             name = findPreference(KEY_NAME);
-            name.setSummary("Account Google: " + Scales.username);
+            name.setSummary("Account Google: " + Versions.username);
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("")) {
+                    if (o.toString().isEmpty()) {
                         Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
-                    if (Scales.command(ScaleInterface.CMD_G_USER + String.valueOf(o.toString())).equals(ScaleInterface.CMD_G_USER)) {
-                        preference.setSummary("Account Google: " + o.toString());
-                        Scales.username = o.toString();
+                    if (ScaleModule.setUsername(o.toString())) {
+                        preference.setSummary("Account Google: " + o);
+                        Versions.username = o.toString();
                         Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                         return true;
                     }
@@ -256,23 +197,49 @@ public class ActivityTuning extends PreferenceActivity {
             });
         }
         if (name != null) {
+            String KEY_PASSWORD = "password";
             name = findPreference(KEY_PASSWORD);
-            name.setSummary("Password account Google - " + Scales.password);
+            name.setSummary("Password account Google - " + Versions.password);
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().equals("")) {
+                    if (o.toString().isEmpty()) {
                         Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
 
-                    if (Scales.command(ScaleInterface.CMD_G_PASS + String.valueOf(o.toString())).equals(ScaleInterface.CMD_G_PASS)) {
-                        preference.setSummary("Password account Google: " + o.toString());
-                        Scales.password = o.toString();
+                    if (ScaleModule.setPassword(o.toString())) {
+                        preference.setSummary("Password account Google: " + o);
+                        Versions.password = o.toString();
                         Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                         return true;
                     }
                     preference.setSummary("Password account Google: ???");
+                    Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
+
+                    return false;
+                }
+            });
+        }
+        if (name != null) {
+            String KEY_PHONE = "phone_msg";
+            name = findPreference(KEY_PHONE);
+            name.setSummary("Phone for Boss - " + Versions.phone);
+            name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+                    if (o.toString().isEmpty()) {
+                        Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+
+                    if (ScaleModule.setPhone(o.toString())) {
+                        preference.setSummary("Phone for Boss: " + o);
+                        Versions.phone = o.toString();
+                        Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    preference.setSummary("Phone for Boss: ???");
                     Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
 
                     return false;
@@ -284,24 +251,22 @@ public class ActivityTuning extends PreferenceActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        boolean b;
         if (flag_restore) {
             if (point1.x != Integer.MIN_VALUE && point2.x != Integer.MIN_VALUE) {
-                Scales.coefficientA = (float) (point1.y - point2.y) / (point1.x - point2.x);
-                Scales.coefficientB = point1.y - Scales.coefficientA * point1.x;
+                Versions.coefficientA = (float) (point1.y - point2.y) / (point1.x - point2.x);
+                Versions.coefficientB = point1.y - Versions.coefficientA * point1.x;
             }
-            Scales.limitTenzo = (int) ((float) Scales.weightMax / Scales.coefficientA);
-            if (Scales.limitTenzo > 0xffffff) {
-                Scales.limitTenzo = 0xffffff;
-                Scales.weightMax = (int) ((float) 0xffffff * Scales.coefficientA);
+            Versions.limitTenzo = (int) (Versions.weightMax / Versions.coefficientA);
+            if (Versions.limitTenzo > 0xffffff) {
+                Versions.limitTenzo = 0xffffff;
+                Versions.weightMax = (int) (0xffffff * Versions.coefficientA);
             }
-            b = Scales.vClass.writeDataScale();
-            if (b)
+            if (ScaleModule.writeData()) {
                 Toast.makeText(getApplicationContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
-            else
+            } else {
                 Toast.makeText(getApplicationContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-        }/*else
-            b = Scales.vClass.writeDataScale();*/
+            }
+        }
 
     }
 }

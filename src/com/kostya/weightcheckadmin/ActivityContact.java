@@ -1,6 +1,5 @@
 package com.kostya.weightcheckadmin;
 
-import android.annotation.TargetApi;
 import android.app.*;
 import android.content.*;
 import android.database.Cursor;
@@ -9,47 +8,42 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
 
-/**
+/*
  * Created with IntelliJ IDEA.
  * User: VictorJava
  * Date: 25.09.13
  * Time: 16:59
  * To change this template use File | Settings | File Templates.
  */
-public class ActivityContact extends ListActivity {
-
+public class ActivityContact extends ListActivity implements View.OnClickListener {
 
     private CheckDBAdapter checkDBAdapter;
     private Vibrator vibrator; //вибратор
-    ListView listView;
-    EditText textSearch;
-    LinearLayout layoutSearch;
-    SimpleCursorAdapter adapter;
-    static final int PICK_CONTACT = 2;
+    private EditText textSearch;
+    private LinearLayout layoutSearch;
+    private SimpleCursorAdapter adapter;
+    //static final int PICK_CONTACT = 2;
 
-    private String contactID;     // contacts unique ID
+    //private String contactID;     // contacts unique ID
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //requestWindowFeature(Window.FEATURE_ACTION_BAR);
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
 
-
-        //ActionBar actionBar = getActionBar();
-        //actionBar.setDisplayHomeAsUpEnabled(true);
-
         setContentView(R.layout.contact);
-        setTitle("Контакты");
-        //getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_search);
+        String action = getIntent().getAction();
+        if ("check".equals(action))
+            setTitle("Выберите контакт для чека");
+        else
+            setTitle(getString(R.string.Contacts));
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -59,7 +53,7 @@ public class ActivityContact extends ListActivity {
 
         checkDBAdapter = new CheckDBAdapter(this);
 
-        listView = getListView();
+        ListView listView = getListView();
         listView.setLongClickable(true);
         listView.setClickable(true);
         listView.setItemsCanFocus(false);
@@ -83,105 +77,39 @@ public class ActivityContact extends ListActivity {
 
             }
         });
-        /*textSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                }
-            }
-        });*/
 
         layoutSearch = (LinearLayout) findViewById(R.id.layoutSearch);
         layoutSearch.setVisibility(View.GONE);
 
-        ImageView buttonBack = (ImageView) findViewById(R.id.buttonBack);
-        buttonBack.setOnClickListener(clickListener);
 
-        ImageView buttonSearch = (ImageView) findViewById(R.id.buttonSearch);
-        buttonSearch.setOnClickListener(clickListener);
+        findViewById(R.id.buttonBack).setOnClickListener(this);
+        findViewById(R.id.buttonSearch).setOnClickListener(this);
+        findViewById(R.id.buttonNew).setOnClickListener(this);
+        findViewById(R.id.closedSearch).setOnClickListener(this);
 
-        ImageView buttonNew = (ImageView) findViewById(R.id.buttonNew);
-        buttonNew.setOnClickListener(clickListener);
+        setupList();
 
-        ImageView closedSearch = (ImageView) findViewById(R.id.closedSearch);
-        closedSearch.setOnClickListener(clickListener);
-
-        updateList(getContact());
-        adapter.setFilterQueryProvider(new FilterQueryProvider() {
-            @Override
-            public Cursor runQuery(CharSequence constraint) {
-                return new FilterCursorWrapper(getContact(), constraint.toString(), ContactsContract.Contacts.DISPLAY_NAME);
-            }
-        });
-    }
-
-    final View.OnClickListener clickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            switch (v.getId()) {
-                case R.id.buttonBack:
-                    onBackPressed();
-                    break;
-                case R.id.buttonSearch:
+        try {
+            String contact = getIntent().getStringExtra("nameFilter");
+            if (!contact.isEmpty()) {
                     layoutSearch.setVisibility(View.VISIBLE);
+                textSearch.setText(contact);
                     textSearch.requestFocus();
-                    imm.showSoftInput(textSearch, InputMethodManager.SHOW_IMPLICIT);
-                    break;
-                case R.id.buttonNew:
-                    Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
-                    startActivity(intent);
-                    break;
-                case R.id.closedSearch:
-                    imm.hideSoftInputFromWindow(textSearch.getWindowToken(), 0);
-                    adapter.getFilter().filter("");
-                    textSearch.setText("");
-                    layoutSearch.setVisibility(View.GONE);
-                    break;
             }
+        } catch (Exception e) {
+
         }
-    };
 
-    @Override
-    public void onActivityResult(int reqCode, int resultCode, Intent data) {
-        super.onActivityResult(reqCode, resultCode, data);
 
-        switch (reqCode) {
-
-            case PICK_CONTACT:
-                if (resultCode == Activity.RESULT_OK) {
-                    Uri contactData = data.getData();
-                    //Cursor contact =  managedQuery(contactData, null, null, null, null);
-                    Cursor contact = getContentResolver().query(contactData, null, null, null, null);
-                    //ContentQueryMap mQueryMap = new ContentQueryMap(contact, BaseColumns._ID, true, null);
-                    //Map<String,ContentValues> map = mQueryMap.getRows();
-
-                    //ContentValues values = map.get(String.valueOf(69));
-                    //String contactName =" ";
-                    /*if (contact.moveToFirst()) {
-
-                        // DISPLAY_NAME = The display name for the contact.
-                        // HAS_PHONE_NUMBER =   An indicator of whether this contact has at least one phone number.
-
-                        //contactName = contact.getString(contact.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                    }*/
-
-                    contact.close();
-                    /*if (c.moveToFirst()) {
-                        String name = c.getString(c.getColumnIndexOrThrow(Contacts.People.NAME));
-                        // TODO Whatever you want to do with the selected contact name.
-                    }*/
-                    retrieveContactNumber(contactData);
-                }
-                break;
-        }
     }
 
     private String retrieveContactName(Uri uriContact) {
 
-        String contactName = null;
         Cursor cursor = getContentResolver().query(uriContact, null, null, null, null);
+        if (cursor == null) {
+            return null;
+        }
+        String contactName = null;
         if (cursor.moveToFirst()) {
             contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
         }
@@ -189,59 +117,38 @@ public class ActivityContact extends ListActivity {
         return contactName;
     }
 
-    private String retrieveContactNumber(Uri uriContact) {
-
-        // getting contacts ID
-        Cursor cursorID = getContentResolver().query(uriContact, new String[]{BaseColumns._ID}, null, null, null);
-        if (cursorID.moveToFirst()) {
-            contactID = cursorID.getString(cursorID.getColumnIndex(BaseColumns._ID));
-        }
-        cursorID.close();
-        // Using the contact ID now we will get contact phone number
-        Cursor cursorPhone = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
-                        ContactsContract.CommonDataKinds.Phone.TYPE + " = " +
-                        ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE,
-                new String[]{contactID}, null);
-
-        //if (cursorPhone.moveToFirst()) {
-        String contactNumber = null;
-        while (cursorPhone.moveToNext())
-            contactNumber = cursorPhone.getString(cursorPhone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-        //}
-        cursorPhone.close();
-        return contactNumber;
-    }
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    void updateList(Cursor cursor) {
-        if (cursor.getCount() > 0) {
-            String[] from = {ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.PHOTO_URI};
+    //@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    void setupList() {
+        String[] from;
+        from = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ? new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.PHOTO_URI} : new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY};
             int[] to = {R.id.contactName, R.id.contactPhoto};
-            adapter = new SimpleCursorAdapter(this, R.layout.item_contact, cursor, from, to);
-
+        adapter = new SimpleCursorAdapter(this, R.layout.item_contact, getContact(), from, to);
+        adapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence constraint) {
+                return new FilterCursorWrapper(getContact(), constraint.toString(), ContactsContract.Contacts.DISPLAY_NAME);
+            }
+        });
             setListAdapter(adapter);
-        }
     }
 
     Cursor getContact() {
         return getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, ContactsContract.Contacts.DISPLAY_NAME + " ASC");
     }
 
-    final AdapterView.OnItemLongClickListener onItemLongClickListener = new AdapterView.OnItemLongClickListener() {
+    private final AdapterView.OnItemLongClickListener onItemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             vibrator.vibrate(100L);
-            CharSequence[] colors = {"ИЗМЕНИТЬ", "УДАЛИТЬ", "ВЫБРАТЬ", "НАЗАД"};
+            CharSequence[] colors = {getString(R.string.CHANGE), getString(R.string.DELETE), getString(R.string.SELECT), getString(R.string.BACK)};
             TextView textTop = (TextView) view.findViewById(R.id.contactName);
             int contactID = (int) id;
             String name = " ";
-
             AlertDialog.Builder builder = new AlertDialog.Builder(ActivityContact.this);
-            if (textTop.getText() != null)
+            if (textTop.getText() != null) {
                 name = textTop.getText().toString();
-            builder.setTitle("Контакт: " + name);
+            }
+            builder.setTitle(getString(R.string.Vendor) + ' ' + name);
             builder.setCancelable(false);
             final int finalContactID = contactID;
             final String finalName = name;
@@ -252,25 +159,22 @@ public class ActivityContact extends ListActivity {
                     Intent intent;
                     switch (which) {
                         case 0:
-                            //Intent intent = new Intent(Intent.ACTION_EDIT, contactUri);
-                            //Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT, contactUri);
                             intent = new Intent(Intent.ACTION_VIEW, contactUri);
-                            //Intent intent = new Intent(ContactsContract.Intents.SHOW_OR_CREATE_CONTACT, contactUri);
                             startActivity(intent);
                             break;
                         case 1:
                             AlertDialog.Builder deleteDialog = new AlertDialog.Builder(ActivityContact.this);
-                            deleteDialog.setTitle("Удаление: " + finalName);
-                            deleteDialog.setMessage("Вы хотите удалить?");
+                            deleteDialog.setTitle(getString(R.string.Removing) + finalName);
+                            deleteDialog.setMessage(getString(R.string.Do_you_want_to_remove));
                             deleteDialog.setCancelable(false);
-                            deleteDialog.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                            deleteDialog.setPositiveButton(getString(R.string.Yes), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     getContentResolver().delete(contactUri, null, null);
                                     adapter.changeCursor(getContact());
                                 }
                             });
-                            deleteDialog.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                            deleteDialog.setNegativeButton(getString(R.string.No), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.cancel();
@@ -294,7 +198,7 @@ public class ActivityContact extends ListActivity {
         }
     };
 
-    final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             insertNewCheck((int) id);
@@ -306,35 +210,58 @@ public class ActivityContact extends ListActivity {
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id);
         String action = getIntent().getAction();
         if (action != null) {
-            if (action.equals("down")) {
+            switch (action) {
+                case "check":
                 String name = retrieveContactName(contactUri);
                 String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_DOWN).getLastPathSegment();
-                startActivity(new Intent().setClass(getApplicationContext(), ActivityInputCheck.class).putExtra("id", entryID));
+                    startActivity(new Intent().setClass(getApplicationContext(), ActivityCheck.class).putExtra("id", entryID));
                 finish();
-            } else if (action.equals("up")) {
+                    break;
+                /*case "down":
                 String name = retrieveContactName(contactUri);
+                    String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_DOWN).getLastPathSegment();
+                    //startActivity(new Intent().setClass(getApplicationContext(), ActivityInputCheck.class).putExtra("id", entryID));
+                    startActivity(new Intent().setClass(getApplicationContext(), ActivityCheck.class).putExtra("id", entryID));
+                    finish();
+                break;
+                case "up":
+                    String name = retrieveContactName(contactUri);
                 String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_UP).getLastPathSegment();
                 startActivity(new Intent().setClass(getApplicationContext(), ActivityOutputCheck.class).putExtra("id", entryID));
                 finish();
-            } else if (action.equals("contact")) {
+                break;*/
+                case "contact":
                 Intent intent = new Intent(Intent.ACTION_VIEW, contactUri);
                 startActivity(intent);
+                    break;
             }
         }
     }
 
-    /*public Cursor fetchCountriesByName(String inputText) throws SQLException {
-        Cursor mCursor = null;
-        if (inputText == null  ||  inputText.length () == 0)  {
-            mCursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null,null, ContactsContract.Contacts.DISPLAY_NAME + " ASC");
-        }else {
-            mCursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, ContactsContract.Contacts.DISPLAY_NAME + " LIKE '%" + inputText + "%'",null, ContactsContract.Contacts.DISPLAY_NAME + " ASC");*//* _utf8 COLLATE utf8_general_ci COLLATE NOCASE*//*
+    @Override
+    public void onClick(View v) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        switch (v.getId()) {
+            case R.id.buttonBack:
+                onBackPressed();
+                break;
+            case R.id.buttonSearch:
+                layoutSearch.setVisibility(View.VISIBLE);
+                textSearch.requestFocus();
+                imm.showSoftInput(textSearch, InputMethodManager.SHOW_IMPLICIT);
+                break;
+            case R.id.buttonNew:
+                Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
+                startActivity(intent);
+                break;
+            case R.id.closedSearch:
+                imm.hideSoftInputFromWindow(textSearch.getWindowToken(), 0);
+                adapter.getFilter().filter("");
+                textSearch.setText("");
+                layoutSearch.setVisibility(View.GONE);
+                break;
         }
-        if (mCursor != null) {
-            mCursor.moveToFirst();
         }
-        return mCursor;
-    }*/
 
     private class FilterCursorWrapper extends CursorWrapper {
 
@@ -348,26 +275,27 @@ public class ActivityContact extends ListActivity {
             super(cursor);
             this.filter = filter.toLowerCase();
             this.column = cursor.getColumnIndex(column);
-            if (!this.filter.isEmpty()) {
+            if (this.filter.isEmpty()) {
+                count = super.getCount();
+                index = new int[count];
+                for (int i = 0; i < count; i++) {
+                    index[i] = i;
+                }
+            } else {
                 count = super.getCount();
                 index = new int[count];
                 for (int i = 0; i < count; i++) {
                     super.moveToPosition(i);
                     String[] split = getString(this.column).toLowerCase().split(" ");
                     for (String str : split) {
-                        if (str.trim().startsWith(this.filter))
+                        if (str.trim().startsWith(this.filter)) {
                             index[pos++] = i;
                     }
+                }
                 }
                 count = pos;
                 pos = 0;
                 super.moveToFirst();
-            } else {
-                count = super.getCount();
-                index = new int[count];
-                for (int i = 0; i < count; i++) {
-                    index[i] = i;
-                }
             }
         }
 

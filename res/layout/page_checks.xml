@@ -3,16 +3,19 @@
               android:orientation="horizontal"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-              android:background="@color/background_light" android:padding="@dimen/padding">
-
+              android:padding="@dimen/padding">
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" android:background="#ff4e4e4e">
+        <ScrollView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/scrollView3">
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent" android:background="@drawable/round_rectangle_pager_w"
+                    android:layout_height="wrap_content" android:background="@drawable/round_rectangle_pager_w"
                 android:layout_margin="@dimen/corners">
             <LinearLayout
                     android:orientation="vertical"
@@ -23,21 +26,33 @@
                         android:orientation="horizontal"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content">
+                        <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center" android:background="@color/background_item_list"
+                                android:focusableInTouchMode="false" android:id="@+id/imageDirect"
+                                android:layout_margin="@dimen/corners"/>
                     <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/WEIGHT_CHECK_N"
                             android:id="@+id/textView" android:textColor="@drawable/text_selector"
-                            android:textSize="@dimen/text_large"
+                                android:textSize="@dimen/text_medium"
                             android:layout_margin="@dimen/stroke"
-                            android:textStyle="bold"/>
+                                android:textStyle="bold" android:layout_gravity="center"/>
                     <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:id="@+id/check_id"
                             android:textColor="@drawable/text_selector" android:background="@drawable/item_selector_w"
                             android:textSize="@dimen/text_large" android:textStyle="bold"
-                            android:layout_margin="@dimen/stroke" android:layout_weight="2" android:gravity="center"/>
+                                android:layout_margin="@dimen/stroke" android:layout_weight="2" android:gravity="center"
+                                android:layout_gravity="center"/>
+                        <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/imageView2" android:src="@drawable/scale_launcher"
+                                android:layout_gravity="center"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="horizontal"
@@ -81,14 +96,14 @@
                             android:textColor="@drawable/text_selector" android:background="@drawable/item_selector_w"
                             android:textSize="@dimen/text_medium" android:textStyle="bold"
                             android:layout_weight="1" android:layout_margin="@dimen/stroke"
-                            android:gravity="center|right"/>
+                                android:gravity="center"/>
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content" android:layout_margin="@dimen/corners"
-                    >
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/corners" android:layout_marginRight="@dimen/corners">
                 <LinearLayout
                         android:orientation="horizontal"
                         android:layout_width="fill_parent"
@@ -147,7 +162,7 @@
                                       android:text="@string/Netto"
                                       android:id="@+id/netto"
                                       android:textColor="@drawable/text_selector"
-                                      android:textSize="@dimen/text_medium"
+                                          android:textSize="@dimen/text_large"
                                       android:gravity="left|center" android:layout_margin="@dimen/stroke"
                                       android:layout_weight="1" android:background="@color/white"
                                       android:textStyle="bold"/>
@@ -155,7 +170,7 @@
                                       android:id="@+id/netto_row"
                                       android:textColor="@drawable/text_selector" android:background="@color/white"
                                       android:textStyle="bold"
-                                      android:textSize="@dimen/text_medium"
+                                          android:textSize="@dimen/text_large"
                                       android:layout_margin="@dimen/stroke"
                                       android:layout_weight="1" android:gravity="center"/>
                         </LinearLayout>
@@ -165,8 +180,9 @@
             <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content" android:layout_margin="@dimen/corners"
-                    android:padding="@dimen/corners">
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/corners" android:layout_marginLeft="@dimen/corners"
+                        android:layout_marginRight="@dimen/corners">
                 <LinearLayout
                         android:orientation="horizontal"
                         android:layout_width="fill_parent"
@@ -213,10 +229,41 @@
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content" android:layout_margin="@dimen/corners"
+                        android:padding="@dimen/corners">
+                    <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent" android:layout_margin="@dimen/corners"
-                    android:id="@+id/layoutImageView" android:visibility="invisible">
+                            android:layout_height="fill_parent">
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/textView7" android:text="@string/terminal"
+                                android:textColor="@drawable/text_selector" android:textSize="@dimen/text_nano"/>
+                        <TextView
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@drawable/text_selector"
+                                android:gravity="right" android:id="@+id/textNumTerminal"
+                                android:textSize="@dimen/text_nano"/>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent"
+                                  android:layout_height="fill_parent">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                  android:id="@+id/textView9" android:text="@string/Scale"
+                                  android:textColor="@drawable/text_selector" android:textSize="@dimen/text_nano"/>
+                        <TextView android:layout_width="fill_parent" android:layout_height="wrap_content"
+                                  android:id="@+id/textNumScale" android:textColor="@drawable/text_selector"
+                                  android:gravity="right" android:textSize="@dimen/text_nano"/>
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content" android:layout_margin="@dimen/corners"
+                        android:id="@+id/layoutImageView">
                 <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -240,7 +287,14 @@
                         android:clickable="true"
                         android:layout_margin="@dimen/stroke" android:background="@drawable/image_selector"
                         android:contentDescription="@string/SMS"/>
+                    <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_launcher_dollar"
+                            android:background="@drawable/image_selector" android:layout_margin="@dimen/stroke"
+                            android:layout_weight="1" android:clickable="true" android:id="@+id/imageViewDollar"/>
             </LinearLayout>
         </LinearLayout>
+        </ScrollView>
     </LinearLayout>
 </LinearLayout>

@@ -8,7 +8,7 @@
     </item>
     <item>
         <clip android:clipOrientation="vertical" android:gravity="bottom">
-            <bitmap android:src="@drawable/battery_full_r"/>
+            <bitmap android:src="@drawable/b_full_r"/>
         </clip>
     </item>
 </layer-list>

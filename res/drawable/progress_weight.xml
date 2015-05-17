@@ -57,11 +57,14 @@
             <shape>
                 <corners android:radius="5dip"/>
                 <gradient
-                        android:startColor="#80ffd300"
-                        android:centerColor="#80ffb600"
+                        android:startColor="#710b17ff"
+                        android:centerColor="#b60b09d1"
+                        android:endColor="#56080ce8"
                         android:centerY="0.75"
-                        android:endColor="#a0ffcb00"
                         android:angle="270"/>
+                <!--android:startColor="#80ffd300"
+                                        android:centerColor="#80ffb600"
+                                        android:endColor="#a0ffcb00"-->
             </shape>
         </clip>
     </item>

@@ -1,5 +1,7 @@
 package com.kostya.weightcheckadmin;
 
+import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
+
 import java.util.Iterator;
 
 /*

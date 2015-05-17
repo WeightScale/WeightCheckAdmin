@@ -9,8 +9,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" android:focusable="false"
             android:focusableInTouchMode="false" android:clickable="false"
-            android:orientation="horizontal" android:padding="@dimen/padding" android:background="@color/transparent"
-            >
+            android:orientation="horizontal" android:padding="@dimen/padding">
         <TextView android:layout_height="fill_parent"
                   android:textSize="@dimen/text_medium"
                   android:layout_width="0dp"

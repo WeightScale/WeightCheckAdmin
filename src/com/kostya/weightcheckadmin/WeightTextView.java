@@ -35,17 +35,17 @@ public class WeightTextView extends ProgressBar {
         textPaint.setTextSize(textSize);
     }
 
-    public synchronized void updateProgress(int progress) {
+    public synchronized void updateProgress(int progress, int color, float size) {
         setText(progress + getResources().getString(R.string.scales_kg));
-        textSize = getResources().getDimension(R.dimen.text_big);
-        textColor = Color.BLACK;
+        textSize = size;
+        textColor = color;
         drawableStateChanged();
     }
 
-    public synchronized void updateProgress(String progress) {
+    public synchronized void updateProgress(String progress, int color, float size) {
         setText(progress);
-        textSize = getResources().getDimension(R.dimen.text_large_xx);
-        textColor = Color.RED;
+        textSize = size;
+        textColor = color;
         drawableStateChanged();
     }
 
@@ -64,5 +64,15 @@ public class WeightTextView extends ProgressBar {
     private void setText(String text) {
         this.text = text;
         postInvalidate();
+    }
+
+    private void setTextColor(int color) {
+        textColor = color;
+        postInvalidate();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
     }
 }

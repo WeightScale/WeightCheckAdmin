@@ -1,10 +1,8 @@
 package com.kostya.weightcheckadmin;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.*;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ProgressBar;
 import android.support.annotation.NonNull;
@@ -14,10 +12,12 @@ import android.support.annotation.NonNull;
  */
 public class BatteryProgressBar extends ProgressBar {
     private String text = "";
-    private int textColor = Color.BLACK;
+    private final int textColor = Color.BLACK;
     private float textSize = getResources().getDimension(R.dimen.text_micro);
     private final Paint textPaint;
     private final Rect bounds;
+    final Drawable dBattery;
+    final Drawable dDischarged;
 
     public BatteryProgressBar(Context context) {
         super(context);
@@ -25,6 +25,8 @@ public class BatteryProgressBar extends ProgressBar {
         bounds = new Rect();
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(textSize);
+        dBattery = getResources().getDrawable(R.drawable.battery);
+        dDischarged = getResources().getDrawable(R.drawable.battery_discharged);
     }
 
     public BatteryProgressBar(Context context, AttributeSet attrs) {
@@ -33,6 +35,10 @@ public class BatteryProgressBar extends ProgressBar {
         bounds = new Rect();
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(textSize);
+        textPaint.setColor(textColor);
+        textPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        dBattery = getResources().getDrawable(R.drawable.battery);
+        dDischarged = getResources().getDrawable(R.drawable.battery_discharged);
     }
 
     public synchronized void updateProgress(int progress) {
@@ -40,14 +46,17 @@ public class BatteryProgressBar extends ProgressBar {
         setProgress(0);
 
         if (progress > 15) {
-            if (progress < 50)
-                setTextColor(Color.WHITE);
-            else
+            if (progress < 50) {
                 setTextColor(Color.BLACK);
-            setProgressDrawable(getResources().getDrawable(R.drawable.battery));
         } else {
             setTextColor(Color.WHITE);
-            setProgressDrawable(getResources().getDrawable(R.drawable.battery_discharged));
+        }
+            setProgressDrawable(dBattery);
+        } else if (progress > 0) {
+            setTextColor(Color.BLACK);
+            setProgressDrawable(dDischarged);
+        } else {
+            setTextColor(Color.TRANSPARENT);
         }
         setText(String.valueOf(progress));
         setProgress(progress);
@@ -62,7 +71,7 @@ public class BatteryProgressBar extends ProgressBar {
     @Override
     protected synchronized void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
-        textPaint.setColor(textColor);
+        //textPaint.setColor(textColor);
         //Rect bounds = new Rect();
         textPaint.getTextBounds(text, 0, text.length(), bounds);
         int x = getWidth() / 2 - bounds.centerX();
@@ -71,19 +80,9 @@ public class BatteryProgressBar extends ProgressBar {
     }
 
     public synchronized void setTextColor(int textColor) {
-        this.textColor = textColor;
+        textPaint.setColor(textColor);
         postInvalidate();
     }
-
-    /*private void setAttrs(AttributeSet attrs) {
-        if (attrs != null) {
-            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.TextProgressBar, 0, 0);
-            setText(a.getString(R.styleable.TextProgressBar_text));
-            setTextColor(a.getColor(R.styleable.TextProgressBar_textColor, Color.BLACK));
-            setTextSize(a.getDimension(R.styleable.TextProgressBar_textSize, getResources().getDimension(R.dimen.text_micro)));
-            a.recycle();
-        }
-    }*/
 
     public synchronized void setTextSize(float textSize) {
         this.textSize = textSize;

@@ -6,7 +6,7 @@
         <Preference android:title="@string/address_scales" android:key="address" android:enabled="false"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/Settings">
-        <PreferenceScreen android:title="Настройки ограничений" android:summary="Ограничения, лимиты, прочее">
+        <PreferenceScreen android:title="@string/Set_values" android:summary="@string/TEXT_MESSAGES13">
             <PreferenceCategory android:title="@string/Settings">
                 <PreferenceScreen android:title="@string/setting_auto_zero"
                                   android:summary="@string/sum_setting_auto_zero">
@@ -26,13 +26,16 @@
                                     android:summary="@string/sum_removing_checks" android:key="day_check_delete"
                                     android:inputType="number"/>
                 <EditTextPreference android:title="@string/closed_checks" android:summary="@string/sum_closed_checks"
-                                    android:key="@string/KEY_DAY_CLOSED_CHECK" android:inputType="number"/>
+                                    android:key="day_closed_check" android:inputType="number"/>
             </PreferenceCategory>
-        </PreferenceScreen>
+        </PreferenceScreen><EditTextPreference android:title="@string/filter_adc" android:summary="@string/sum_filter_adc"
+                                               android:key="filter" android:inputType="number"/>
         <Preference android:title="Для администратора" android:key="admin"/>
     </PreferenceCategory>
-    <PreferenceCategory android:title="****">
+    <PreferenceCategory>
         <Preference android:title="@string/zeroing" android:key="null" android:inputType="number"/>
+        <Preference android:title="@string/Update_scale" android:summary="@string/TEXT_MESSAGE14" android:key="update"
+                    android:enabled="false"/>
         <Preference android:title="@string/about" android:key="about"/>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -4,7 +4,7 @@
     <dimen name="text_large">66sp</dimen>
     <dimen name="text_medium">54sp</dimen>
     <dimen name="text_small">42sp</dimen>
-    <dimen name="text_micro">36sp</dimen>
+    <dimen name="text_micro">30sp</dimen>
     <dimen name="text_nano">30sp</dimen>
     <dimen name="corners">5dip</dimen>
     <dimen name="padding">5dp</dimen>

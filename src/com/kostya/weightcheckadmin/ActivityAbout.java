@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.TextView;
+import com.konst.module.ScaleModule;
+import com.konst.module.Versions;
 
 /*
  * Created by Kostya on 26.04.14.
@@ -21,31 +23,38 @@ public class ActivityAbout extends Activity {
         getWindow().setAttributes(lp);
 
         TextView textSoftVersion = (TextView) findViewById(R.id.textSoftVersion);
-        textSoftVersion.setText(ActivitySearch.versionName + ' ' + String.valueOf(ActivitySearch.versionNumber));
+        textSoftVersion.setText(Main.versionName + ' ' + String.valueOf(Main.versionNumber));
 
         TextView textSettings = (TextView) findViewById(R.id.textSettings);
-        textSettings.append("Версия прошивки весов: v." + Scales.version + '\n');
-        textSettings.append("Имя модуля bluetooth: " + Scales.getName() + '\n');
-        textSettings.append("Адресс модуля bluetooth: " + Scales.getAddress() + '\n');
+        textSettings.append(getString(R.string.Version_scale) + ScaleModule.getNumVersion() + '\n');
+        try {
+            textSettings.append(getString(R.string.Name_module_bluetooth) + ScaleModule.getName() + '\n');
+        } catch (Exception e) {
+            textSettings.append(getString(R.string.Name_module_bluetooth) + '\n');
+        }
+        textSettings.append(getString(R.string.Address_bluetooth) + ScaleModule.getAddress() + '\n');
         textSettings.append("\n");
-        textSettings.append("Оператор связи: " + ActivityApp.networkOperatorName + '\n');
-        textSettings.append("Номер телефона: " + ActivityApp.telephoneNumber + '\n');
+        textSettings.append(getString(R.string.Operator) + Main.networkOperatorName + '\n');
+        textSettings.append(getString(R.string.Number_phone) + Main.telephoneNumber + '\n');
         textSettings.append("\n");
-        textSettings.append("Батарея: " + Scales.battery + " %" + '\n');
-        textSettings.append("Температура: " + Scales.getTemp() + '°' + 'C' + '\n');
-        textSettings.append("Коэфициэнт: " + Scales.coefficientA + '\n');
-        textSettings.append("НПВ: " + Scales.weightMax + ' ' + getString(R.string.scales_kg) + '\n');
+        textSettings.append(getString(R.string.Battery) + ScaleModule.battery + " %" + '\n');
+        if (ScaleModule.Version != null) {
+            textSettings.append(getString(R.string.Temperature) + ScaleModule.getModuleTemperature() + '°' + 'C' + '\n');
+        }
+        textSettings.append(getString(R.string.Coefficient) + Versions.coefficientA + '\n');
+        textSettings.append(getString(R.string.MLW) + Versions.weightMax + ' ' + getString(R.string.scales_kg) + '\n');
         textSettings.append("\n");
-        textSettings.append("Таблица Google Disk: " + Scales.spreadsheet + '\n');
-        textSettings.append("Пользователь Google Disk: " + Scales.username + '\n');
+        textSettings.append(getString(R.string.Table_google_disk) + Versions.spreadsheet + '\n');
+        textSettings.append(getString(R.string.User_google_disk) + Versions.username + '\n');
+        textSettings.append(getString(R.string.Phone_for_sms) + Versions.phone + '\n');
         textSettings.append("\n");
-        textSettings.append("Таймер выключения: " + Scales.timer + ' ' + getString(R.string.minute) + '\n');
-        textSettings.append("Шаг измерения веса: " + Scales.step + ' ' + getString(R.string.scales_kg) + '\n');
-        textSettings.append("Захват взвешивания: " + Scales.autoCapture + ' ' + getString(R.string.scales_kg) + '\n');
+        textSettings.append(getString(R.string.Off_timer) + Versions.timeOff + ' ' + getString(R.string.minute) + '\n');
+        textSettings.append(getString(R.string.Step_capacity_scale) + Main.stepMeasuring + ' ' + getString(R.string.scales_kg) + '\n');
+        textSettings.append(getString(R.string.Capture_weight) + Main.autoCapture + ' ' + getString(R.string.scales_kg) + '\n');
         textSettings.append("\n");
 
         TextView textAuthority = (TextView) findViewById(R.id.textAuthority);
-        textAuthority.append("Авторские права принадлежат 2012-2014 Konst" + '\n');
-        textAuthority.append("Все права защищены" + '\n');
+        textAuthority.append(getString(R.string.Copyright) + '\n');
+        textAuthority.append(getString(R.string.Reserved) + '\n');
     }
 }

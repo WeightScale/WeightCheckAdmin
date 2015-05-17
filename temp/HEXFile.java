@@ -1,15 +1,12 @@
-package com.kostya.bootloader;
+package com.kostya.weightcheckadmin.bootloader;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Handler;
-import com.kostya.weightcheckadmin.R;
 
 import java.io.BufferedReader;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 
 /**
  * Created with IntelliJ IDEA.

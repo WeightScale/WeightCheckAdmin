@@ -4,7 +4,7 @@ package com.kostya.weightcheckadmin;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import com.kostya.bootloader.AVRProgrammer;
+import com.kostya.weightcheckadmin.bootloader.AVRProgrammer;
 
 import java.io.IOException;
 import java.io.InputStream;

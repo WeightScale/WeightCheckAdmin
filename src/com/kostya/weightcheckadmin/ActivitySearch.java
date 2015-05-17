@@ -1,164 +1,21 @@
 //Ищет весы
 package com.kostya.weightcheckadmin;
 
-import android.annotation.TargetApi;
 import android.app.*;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.*;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.*;
-import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.view.*;
 import android.widget.*;
-import com.kostya.bootloader.ActivityBootloader;
+import com.konst.module.HandlerScaleConnect;
+import com.konst.module.InterfaceScaleModule;
+import com.konst.module.ScaleModule;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class ActivitySearch extends Activity implements View.OnClickListener {
-
-    private class ThreadBluetooth extends AsyncTask<Void, Void, Void> { //поток ожидания Bluetooth
-        private boolean closed = true;
-
-        public void executeStart(Void... params) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                executePostHoneycomb(params);
-            else
-                super.execute(params);
-        }
-
-        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-        private void executePostHoneycomb(Void... params) {
-            super.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            closed = false;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            while (!isCancelled() && !bluetooth.isEnabled()) ;
-            closed = true;
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            //button.setEnabled(true);
-            //button.setText(R.string.discovery_start);
-            linearScreen.setVisibility(View.VISIBLE);
-            if (foundDevice.isEmpty()) {
-                bluetooth.startDiscovery();
-            } else if (foundDevice.size() == 1)
-                new ThreadConnect().executeStart((BluetoothDevice) foundDevice.toArray()[0]);
-            else if (Preferences.read(ActivityPreferences.KEY_LAST, "").isEmpty())
-                log(R.string.error_choice);
-            else
-                new ThreadConnect().executeStart(bluetooth.getRemoteDevice(Preferences.read(ActivityPreferences.KEY_LAST, "")));
-        }
-    }
-
-    //==================================================================================================================
-    private class ThreadConnect extends AsyncTask<BluetoothDevice, String, Short> { //поток подключения к весам
-        // объявляем диалог
-        private ProgressDialog dialog;
-        private boolean closed = true;
-        String deviceName = "";
-
-        public void executeStart(BluetoothDevice... params) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                executePostHoneycomb(params);
-            else
-                super.execute(params);
-        }
-
-        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-        private void executePostHoneycomb(BluetoothDevice... params) {
-            super.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new ProgressDialog(ActivitySearch.this);
-            //dialog = new ProgressDialog(ActivitySearch.this);
-            dialog.setCancelable(false);
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            dialog.setIcon(R.drawable.scan_network);
-            dialog.setTitle(R.string.connect);
-            closed = false;
-        }
-
-        @Override
-        protected Short doInBackground(BluetoothDevice... bluetoothDevice) {
-            deviceName = bluetoothDevice[0].getName();
-            publishProgress(deviceName);
-            if (Scales.connect(bluetoothDevice[0]))
-                if (bootloader)
-                    return 1;
-                else {
-                    if (Scales.isScales())
-                        return 1;
-                    else
-                        return -1;
-                }
-            return 0;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... name) {
-            super.onProgressUpdate(name);
-            dialog.setMessage(getString(R.string.connect_to) + '\n' + name[0]);
-            dialog.show();
-            log(R.string.connect_to, name[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Short result) {
-            switch (result) {
-                case 0:
-                    Scales.disconnect();
-                    log(getString(R.string.connect_no) + ' ' + deviceName);
-                    break;
-                case -1:
-                    Scales.disconnect();
-                    log(R.string.version_no);
-                    break;
-                case 1:
-                    if (bootloader) {
-                        log("Connect programmerID ");
-                        startActivity(new Intent().setClass(getApplicationContext(), ActivityBootloader.class));
-                    } else
-                        startActivity(new Intent().setClass(getApplicationContext(), ActivityScales.class));
-            }
-            dialog.dismiss();
-            listView.setEnabled(true);
-            listView.setOnItemClickListener(onItemClickListener);
-            closed = true;
-        }
-    }
-
-    //==================================================================================================================
-    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            listView.setEnabled(false);
-            bluetooth.cancelDiscovery();
-            new ThreadConnect().executeStart((BluetoothDevice) foundDevice.toArray()[i]);
-        }
-    };
-    //==================================================================================================================
-    private final ThreadBluetooth threadBluetooth = new ThreadBluetooth();
-
-    private Vibrator vibrator; //вибратор
 
     private BroadcastReceiver broadcastReceiver; //приёмник намерений
     private BluetoothAdapter bluetooth; //блютуз адаптер
@@ -166,96 +23,162 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
     private ArrayAdapter<BluetoothDevice> bluetoothAdapter; //адаптер имён
     private IntentFilter intentFilter; //фильтр намерений
     private ListView listView; //список весов
-    //private ProgressBar progressBar; //прогресс
     private TextView textViewLog; //лог событий
-    private LinearLayout linearScreen;//лайаут для экрана показывать когда загрузились настройки
 
-    public static int versionNumber;
-    public static String versionName;
+    //private LinearLayout linearScreen;//лайаут для экрана показывать когда загрузились настройки
+
+    //public static int versionNumber;
+    //public static String versionName = "";
     //static boolean flag_connect = false;
-    static boolean bootloader = false;
 
-    private boolean doubleBackToExitPressedOnce;
+    //private boolean doubleBackToExitPressedOnce;
+    //==================================================================================================================
+    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            if (bluetooth.isDiscovering()) {
+                bluetooth.cancelDiscovery();
+            }
+            scaleModule.init(Main.versionName, (BluetoothDevice) foundDevice.toArray()[i]);
+        }
+    };
 
     //==================================================================================================================
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*Configuration  config = new Configuration(getResources().getConfiguration());
-        config.locale = Locale.ENGLISH ;
-        getResources().updateConfiguration(config,getResources().getDisplayMetrics());*/
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        ActivityApp.telephoneNumber = telephonyManager.getLine1Number();
-        ActivityApp.simNumber = telephonyManager.getSimSerialNumber();
-        ActivityApp.networkOperatorName = telephonyManager.getNetworkOperatorName();
-        ActivityApp.networkCountry = telephonyManager.getNetworkCountryIso();
-        int state = telephonyManager.getSimState();
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setContentView(R.layout.search);
+
+        setTitle(getString(R.string.Search_scale)); //установить заголовок
+
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = 1.0f;
+        getWindow().setAttributes(lp);
+
+        //Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        textViewLog = (TextView) findViewById(R.id.textLog);
         bluetooth = BluetoothAdapter.getDefaultAdapter();
-        switch (state) {
-            case TelephonyManager.SIM_STATE_READY:
-                if (bluetooth == null) {
-                    Toast.makeText(getBaseContext(), R.string.bluetooth_no, Toast.LENGTH_LONG).show();
-                    finish();
-                } else {
-                    setupScale();
+
+        broadcastReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) { //обработчик Bluetooth
+                String action = intent.getAction();
+                if (action != null) {
+                    switch (action) {
+                        case BluetoothAdapter.ACTION_DISCOVERY_STARTED: //поиск начался
+                            log(R.string.discovery_started);
+                            foundDevice.clear();
+                            bluetoothAdapter.notifyDataSetChanged();
+                            setTitle(getString(R.string.discovery_started)); //установить заголовок
+
+                            setProgressBarIndeterminateVisibility(true);
+                            break;
+                        case BluetoothDevice.ACTION_FOUND:  //найдено устройство
+                            BluetoothDevice bd = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            foundDevice.add(bd);
+                            bluetoothAdapter.notifyDataSetChanged();
+                            //BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            String name = null;
+                            if (bd != null) {
+                                name = bd.getName();
+                            }
+                            if (name != null) {
+                                log(R.string.device_found, name);
+                            }
+                            break;
+                        case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:  //поиск завершён
+                            log("Поиск завершён");
+                            setProgressBarIndeterminateVisibility(false);
+                            break;
+                        case BluetoothDevice.ACTION_ACL_CONNECTED:
+                            setProgressBarIndeterminateVisibility(false);
+                            try {
+                                setTitle(" \"" + ScaleModule.getName() + "\", v." + ScaleModule.getNumVersion()); //установить заголовок
+                            } catch (Exception e) {
+                                setTitle(" \"" + e.getMessage() + "\", v." + ScaleModule.getNumVersion()); //установить заголовок      }
+                            }
+                            break;
+                        case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+                            setTitle(getString(R.string.Search_scale)); //установить заголовок
+                            break;
+                    }
                 }
-                break;
-            default:
-                Toast.makeText(getBaseContext(), R.string.telephony_sim_no, Toast.LENGTH_LONG).show();
-                finish();
+            }
+        };
+
+        intentFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        registerReceiver(broadcastReceiver, intentFilter);
+
+        if (bluetooth != null) {
+            if (!bluetooth.isEnabled()) {
+                log(R.string.bluetooth_off, true);
+                bluetooth.enable();
+            } else {
+                log(R.string.bluetooth_on, true);
+            }
         }
+
+        foundDevice = new ArrayList<>();
+
+
+        for (int i = 0; Preferences.contains(ActivityPreferences.KEY_ADDRESS + i); i++) { //заполнение списка
+            foundDevice.add(bluetooth.getRemoteDevice(Preferences.read(ActivityPreferences.KEY_ADDRESS + i, "")));
+        }
+        bluetoothAdapter = new BluetoothListAdapter(this, foundDevice);
+
+        findViewById(R.id.buttonSearchBluetooth).setOnClickListener(this);
+        findViewById(R.id.buttonBack).setOnClickListener(this);
+
+        listView = (ListView) findViewById(R.id.listViewDevices);  //список весов
+        listView.setAdapter(bluetoothAdapter);
+        listView.setOnItemClickListener(onItemClickListener);
+
+        if (foundDevice.isEmpty()) {
+            bluetooth.startDiscovery();
+        }
+        /*String msg = "0503285426 coffa=0.25687 coffb gogusr=kreogen.lg@gmail.com gogpsw=htcehc25";
+        String str = encodeMessage(msg);
+        decodeMessage("+380503285426",str);
+        byte[] pdu = fromHexString("079183503082456201000C9183503082456200004A33DCCC56DBE16EB5DCC82C4FA7C98059AC86CBED7423B33C9D2E8FD47235DE5E07B8EB68B91A1D8FBDD543359CCC7EC7CC72F8482D57CFED7AC0FA6E46AFCD351C");
+
+        Intent intent = new Intent(IncomingSMSReceiver.SMS_RECEIVED_ACTION);
+        intent.putExtra("pdus", new Object[] { pdu });
+        sendBroadcast(intent);*/
     }
 
     //==================================================================================================================
     private void exit() {
-        threadBluetooth.cancel(true);
-        while (!threadBluetooth.closed) ;
-        if (bluetooth.isDiscovering())
+        if (bluetooth.isDiscovering()) {
             bluetooth.cancelDiscovery();
-        unregisterReceiver(broadcastReceiver);
-        Scales.disconnect();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            Set<String> def = new HashSet<String>();
-            def = Preferences.read(ActivityPreferences.KEY_DEVICES, def);
-            if (!def.isEmpty())
-                def.clear();
-
-            for (BluetoothDevice aFoundDevice : foundDevice) {
-                def.add(aFoundDevice.getAddress());
-            }
-            Preferences.write(ActivityPreferences.KEY_DEVICES, def);
-        } else {
-            for (int i = 0; Preferences.contains(ActivityPreferences.KEY_ADDRESS + i); i++) //стереть прошлый список
-                Preferences.remove(ActivityPreferences.KEY_ADDRESS + i);
-            for (int i = 0; i < foundDevice.size(); i++) //сохранить новый список
-                Preferences.write(ActivityPreferences.KEY_ADDRESS + i, ((BluetoothDevice) foundDevice.toArray()[i]).getAddress());
         }
-        bluetooth.disable();
-        while (bluetooth.isEnabled()) ;
-        sendBroadcast(new Intent(ServiceGetDateServer.CLOSED_SCALE));
-        finish();
+        unregisterReceiver(broadcastReceiver);
+
+        for (int i = 0; Preferences.contains(ActivityPreferences.KEY_ADDRESS + i); i++) { //стереть прошлый список
+            Preferences.remove(ActivityPreferences.KEY_ADDRESS + i);
+        }
+        for (int i = 0; i < foundDevice.size(); i++) { //сохранить новый список
+            Preferences.write(ActivityPreferences.KEY_ADDRESS + i, ((BluetoothDevice) foundDevice.toArray()[i]).getAddress());
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        exit();
     }
 
     //==================================================================================================================
     @Override
     public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            exit();
-            return;
-        }
-        bluetooth.cancelDiscovery();
-        doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, R.string.press_again_to_exit /*Please click BACK again to exit*/, Toast.LENGTH_SHORT).show();
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-
-            }
-        }, 2000);
+        super.onBackPressed();
     }
 
     //==================================================================================================================
@@ -280,7 +203,8 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                 bluetooth.startDiscovery();
                 break;
             case R.id.exit:
-                exit();
+                //onDestroy();
+                finish();
                 break;
         }
         return true;
@@ -299,159 +223,14 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
     //==================================================================================================================
     void log(int resource, boolean toast) { //для текста
         textViewLog.setText(getString(resource) + '\n' + textViewLog.getText());
-        if (toast)
+        if (toast) {
             Toast.makeText(getBaseContext(), resource, Toast.LENGTH_SHORT).show();
+        }
     }
 
     //==================================================================================================================
     void log(int resource, String str) { //для ресурсов с текстовым дополнением
         textViewLog.setText(getString(resource) + ' ' + str + '\n' + textViewLog.getText());
-    }
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    void setupScale() {
-        /*Window window = getWindow();
-        window.requestFeature(Window.FEATURE_CUSTOM_TITLE);*/
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
-        setContentView(R.layout.search);
-
-        setProgressBarIndeterminateVisibility(true);
-
-        /*window.setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_progress_bar);
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.status_progress);
-        progressBar.setVisibility(View.VISIBLE);*/
-
-        linearScreen = (LinearLayout) findViewById(R.id.searchScreen);
-        linearScreen.setVisibility(View.INVISIBLE);
-
-        bootloader = getIntent().getBooleanExtra("bootloader", false);
-        textViewLog = (TextView) findViewById(R.id.textLog);
-
-        Settings.System.putInt(getContentResolver(), Settings.System.AUTO_TIME, 1);       //Включаем автообновления дата время
-        Settings.System.putInt(getContentResolver(), Settings.System.AUTO_TIME_ZONE, 1);  //Включаем автообновления дата время
-
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.screenBrightness = 1.0f;
-        getWindow().setAttributes(lp);
-
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (networkInfo != null) {
-            if (networkInfo.isAvailable()) //Если используется
-                new Internet(this).turnOnWiFiConnection(false); // для телефонов у которых один модуль wifi и bluetooth
-        }
-
-        broadcastReceiver = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) { //обработчик Bluetooth
-                String action = intent.getAction();
-                if (action != null) {
-                    if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                        if (bluetooth.getState() == BluetoothAdapter.STATE_OFF) {
-                            log(R.string.bluetooth_off);
-                            bluetooth.enable();
-                        } else if (bluetooth.getState() == BluetoothAdapter.STATE_TURNING_ON) {
-                            log(R.string.bluetooth_turning_on, true);
-                        } else if (bluetooth.getState() == BluetoothAdapter.STATE_ON) {
-                            log(R.string.bluetooth_on, true);
-                        }
-                    } else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {//поиск начался
-                        log(R.string.discovery_started);
-                        foundDevice.clear();
-                        bluetoothAdapter.notifyDataSetChanged();
-                        setTitle(getString(R.string.discovery_started)); //установить заголовок
-                        setProgressBarIndeterminateVisibility(true);
-                    } else if (action.equals(BluetoothDevice.ACTION_FOUND)) { //найдено устройство
-                        BluetoothDevice bd = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                        foundDevice.add(bd);
-                        bluetoothAdapter.notifyDataSetChanged();
-                        String name = null;
-                        if (bd != null) {
-                            name = bd.getName();
-                        }
-                        if (name != null)
-                            log(R.string.device_found, name);
-                    } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) { //устройство отсоеденено
-                        vibrator.vibrate(200);
-                        log(R.string.bluetooth_disconnected);
-                    } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) { //найдено соеденено
-                        vibrator.vibrate(200);
-                        log(R.string.bluetooth_connected);
-                    } else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) { //поиск завершён
-                        setTitle(getString(R.string.app_name) + " \"" + versionName + "\", v." + versionNumber); //установить заголовок
-                        setProgressBarIndeterminateVisibility(false);
-                    }
-                }
-            }
-        };
-
-        intentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        registerReceiver(broadcastReceiver, intentFilter);
-
-        if (bluetooth != null)
-            if (!bluetooth.isEnabled()) {
-                log(R.string.bluetooth_off, true);
-                bluetooth.enable();
-            } else
-                log(R.string.bluetooth_on, true);
-        //}
-
-        PackageInfo packageInfo = null;
-        try {
-            PackageManager packageManager = getPackageManager();
-            if (packageManager != null)
-                packageInfo = packageManager.getPackageInfo(getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            log(e.getMessage());
-        }
-
-        if (packageInfo != null)
-            versionNumber = packageInfo.versionCode;
-        if (packageInfo != null)
-            versionName = packageInfo.versionName;
-
-        setTitle(getString(R.string.app_name) + " \"" + versionName + "\", v." + versionNumber); //установить заголовок
-        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-        Preferences.load(getSharedPreferences(Preferences.PREFERENCES, Context.MODE_PRIVATE)); //загрузить настройки
-
-        foundDevice = new ArrayList<BluetoothDevice>();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            Set<String> def = new HashSet<String>();
-            def = Preferences.read(ActivityPreferences.KEY_DEVICES, def);
-            String define_device = Preferences.read(ActivityPreferences.KEY_LAST, "");
-            if (!define_device.isEmpty())
-                foundDevice.add(bluetooth.getRemoteDevice(define_device));
-            if (!def.isEmpty()) {
-                for (String str : def) {
-                    if (!str.equals(define_device))
-                        foundDevice.add(bluetooth.getRemoteDevice(str));
-                }
-            }
-        } else {
-            for (int i = 0; Preferences.contains(ActivityPreferences.KEY_ADDRESS + i); i++) //заполнение списка
-                foundDevice.add(bluetooth.getRemoteDevice(Preferences.read(ActivityPreferences.KEY_ADDRESS + i, "")));
-        }
-        bluetoothAdapter = new BluetoothListAdapter(this, foundDevice);
-        //bluetoothAdapter.notifyDataSetChanged(); TODO
-
-        findViewById(R.id.buttonMenu).setOnClickListener(this);
-        findViewById(R.id.buttonSearchBluetooth).setOnClickListener(this);
-        findViewById(R.id.buttonBack).setOnClickListener(this);
-
-        listView = (ListView) findViewById(R.id.listViewDevices);  //список весов
-        listView.setAdapter(bluetoothAdapter);
-        listView.setOnItemClickListener(onItemClickListener);
-
-        threadBluetooth.executeStart();
     }
 
     @Override
@@ -471,4 +250,115 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                 break;
         }
     }
+
+
+    public final ScaleModule scaleModule = new ScaleModule() {
+        AlertDialog.Builder dialog;
+        private ProgressDialog dialogSearch;
+
+        @Override
+        public void handleModuleConnect(final Result what) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    switch (what) {
+                        case STATUS_LOAD_OK:
+                            setResult(RESULT_OK, new Intent());
+                            finish();
+                            break;
+                        case STATUS_SCALE_UNKNOWN:
+                            String device = ScaleModule.getName();
+                            log(device + ' ' + getString(R.string.not_scale));
+                            break;
+                        case STATUS_SETTINGS_UNCORRECTED:
+                            dialog = new AlertDialog.Builder(ActivitySearch.this);
+                            dialog.setTitle("Ошибка в настройках");
+                            dialog.setCancelable(false);
+                            dialog.setNegativeButton("Закрыть", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                    onBackPressed();
+                                }
+                            });
+                            dialog.setMessage("Запросите настройки у администратора. Настройки должен выполнять опытный пользователь");
+                            Toast.makeText(getBaseContext(), R.string.preferences_error, Toast.LENGTH_SHORT).show();
+                            setTitle(getString(R.string.app_name) + ": админ настройки неправельные");
+                            dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    startActivity(new Intent(ActivitySearch.this, ActivityTuning.class));
+                                    dialogInterface.dismiss();
+                                }
+                            });
+                            dialog.show();
+                            break;
+                        case STATUS_ATTACH_START:
+                            listView.setEnabled(false);
+                            dialogSearch = new ProgressDialog(ActivitySearch.this);
+                            dialogSearch.setCancelable(false);
+                            dialogSearch.setIndeterminate(false);
+                            dialogSearch.show();
+                            dialogSearch.setContentView(R.layout.custom_progress_dialog);
+                            TextView tv1 = (TextView) dialogSearch.findViewById(R.id.textView1);
+                            tv1.setText(getString(R.string.Connecting) + '\n' + ScaleModule.getName());
+
+                            setProgressBarIndeterminateVisibility(true);
+                            setTitle(getString(R.string.Connecting) + getString(R.string.app_name) + ' ' + ScaleModule.getName()); //установить заголовок
+                            break;
+                        case STATUS_ATTACH_FINISH:
+                            listView.setEnabled(true);
+                            setProgressBarIndeterminateVisibility(false);
+                            if (dialogSearch.isShowing()) {
+                                dialogSearch.dismiss();
+                            }
+                            break;
+                        default:
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void handleModuleConnectError(final Result what, final String error) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    switch (what) {
+                        case STATUS_TERMINAL_ERROR:
+                            dialog = new AlertDialog.Builder(ActivitySearch.this);
+                            dialog.setTitle(getString(R.string.preferences_error));
+                            dialog.setCancelable(false);
+                            dialog.setNegativeButton(getString(R.string.Close), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                    //doubleBackToExitPressedOnce = true;
+                                    onBackPressed();
+                                }
+                            });
+                            dialog.setMessage(error);
+                            Toast.makeText(getBaseContext(), R.string.preferences_error, Toast.LENGTH_SHORT).show();
+                            setTitle(getString(R.string.app_name) + ": " + getString(R.string.preferences_error));
+                            dialog.setPositiveButton(getString(R.string.OK), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    startActivity(new Intent(ActivitySearch.this, ActivityPreferences.class));
+                                    dialogInterface.dismiss();
+                                }
+                            });
+                            dialog.show();
+                            log(error);
+                            break;
+                        case STATUS_CONNECT_ERROR:
+                            //setTitle(getString(R.string.app_name) + getString(R.string.error_connect)); //установить заголовок
+                            log(getString(R.string.error_connect));
+                            break;
+                        default:
+                    }
+                }
+            });
+        }
+    };
+
 }

@@ -8,6 +8,11 @@
         <item>Перевеска</item>
         <item>Тест</item>
     </string-array>
+    <!--<string-array name="mime_type_for_send_admin">
+        <item>googleDisk</item>
+        <item>sms</item>
+        <item>email</item>
+    </string-array>-->
     <!-- <integer-array name="thermometer">
          <item>@drawable/thermometer-0</item>
          <item>@drawable/thermometer-1</item>

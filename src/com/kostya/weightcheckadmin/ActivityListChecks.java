@@ -2,15 +2,19 @@ package com.kostya.weightcheckadmin;
 
 
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.*;
+import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,8 +23,8 @@ import android.widget.SimpleCursorAdapter;
  * Time: 8:37
  * To change this template use File | Settings | File Templates.
  */
-public class ActivityListChecks extends ListActivity {
-
+public class ActivityListChecks extends ListActivity implements View.OnClickListener {
+    CheckDBAdapter checkTable;
     private ListView listView;
 
     @Override
@@ -28,58 +32,80 @@ public class ActivityListChecks extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_checks);
 
-        setTitle(getString(R.string.app_name) + ' ' + "получаем чеки..."); //установить заголовок*/
+        setTitle(getString(R.string.app_name) + ' ' + getString(R.string.get_checks)); //установить заголовок*/
 
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.screenBrightness = 1.0f;
         getWindow().setAttributes(lp);
 
+        //ArrayList<Integer> checks = getIntent().getIntegerArrayListExtra("listChecks");
+        checkTable = new CheckDBAdapter(this);
         listView = getListView();
-        listView.setOnItemClickListener(onItemClickListener);
 
-        ImageView buttonBack = (ImageView) findViewById(R.id.buttonBack);
-        buttonBack.setOnClickListener(clickListener);
 
-        listSetup();
-        //new ThreadViewChecks().execute();
+        findViewById(R.id.buttonBack).setOnClickListener(this);
+
+        if ("notifyChecks".equals(getIntent().getAction())) {
+            Bundle b = getIntent().getExtras();
+            ArrayList<TaskCommand.ObjParcel> items = b.getParcelableArrayList("listCheckNotify");
+            if (items != null) {
+                listNotifySetup(items);
+                listView.setOnItemClickListener(onItemClickListenerNotify);
+            }
+
+        } else {
+            listSetup();
+            listView.setOnItemClickListener(onItemClickListenerScale);
+        }
+
     }
 
-    /*@Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }*/
-
-    final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+    private final AdapterView.OnItemClickListener onItemClickListenerScale = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //startActivity(new Intent().setClass(getApplicationContext(),ActivityViewCheck.class).putExtra("id",id));
-            startActivity(new Intent().setClass(getApplicationContext(), ActivityPageChecks.class).putExtra("position", position));
+            startActivity(new Intent(getApplicationContext(), ActivityPageChecks.class).putExtra("position", position));
         }
     };
 
-    final View.OnClickListener clickListener = new View.OnClickListener() {
+    private final AdapterView.OnItemClickListener onItemClickListenerNotify = new AdapterView.OnItemClickListener() {
         @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.buttonBack:
-                    onBackPressed();
-                    break;
-            }
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            startActivity(new Intent().setClass(getApplicationContext(), ActivityViewCheck.class).putExtra("id", (int) id));
         }
     };
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.buttonBack:
+                onBackPressed();
+                break;
+        }
+    }
 
     private void listSetup() {
+        /*
+            Устанавливаем флаг не показывать старые чеки
+        */
+        checkTable.invisibleCheckIsReady(Preferences.read(ActivityPreferences.KEY_DAY_CHECK_DELETE, Main.default_day_delete_check));
+        /*
+            Удаляем чеки отправленые на сервер через n дней
+        */
+        checkTable.deleteCheckIsServer();
 
-        Cursor cursor = new CheckDBAdapter(this).getAllEntries(CheckDBAdapter.VISIBLE);
+        Cursor cursor = checkTable.getAllEntries(CheckDBAdapter.VISIBLE);
+        if (cursor == null) {
+            return;
+        }
         String[] columns = {
                 CheckDBAdapter.KEY_ID,
                 CheckDBAdapter.KEY_DATE_CREATE,
                 CheckDBAdapter.KEY_TIME_CREATE,
                 CheckDBAdapter.KEY_VENDOR,
-                CheckDBAdapter.KEY_WEIGHT_GROSS,
-                CheckDBAdapter.KEY_WEIGHT_TARE,
+                CheckDBAdapter.KEY_WEIGHT_FIRST,
+                CheckDBAdapter.KEY_WEIGHT_SECOND,
                 CheckDBAdapter.KEY_WEIGHT_NETTO,
-                CheckDBAdapter.KEY_PRICE_SUM, CheckDBAdapter.KEY_DIRECT};
+                CheckDBAdapter.KEY_PRICE_SUM, CheckDBAdapter.KEY_DIRECT, CheckDBAdapter.KEY_DIRECT, CheckDBAdapter.KEY_DIRECT};
 
         int[] to = {
                 R.id.check_id,
@@ -89,12 +115,88 @@ public class ActivityListChecks extends ListActivity {
                 R.id.gross_row,
                 R.id.tare_row,
                 R.id.netto_row,
-                R.id.sum_row, R.id.imageDirect};
+                R.id.sum_row, R.id.imageDirect, R.id.gross, R.id.tare};
         SimpleCursorAdapter namesAdapter = new SimpleCursorAdapter(getApplicationContext(), R.layout.item_check, cursor, columns, to);
+        namesAdapter.setViewBinder(new ListCheckViewBinder());
         setListAdapter(namesAdapter);
-        setTitle(getString(R.string.Checks_closed) + " кол-во " + listView.getCount()); //установить заголовок
+        //MyCursorAdapter namesAdapter = new MyCursorAdapter(getApplicationContext(), R.layout.item_check, cursor, columns, to);
+        //setListAdapter(namesAdapter);
+        setTitle(getString(R.string.Checks_closed) + getString(R.string.qty) + listView.getCount()); //установить заголовок
 
     }
 
+    private void listNotifySetup(ArrayList<TaskCommand.ObjParcel> items) {
+        ListAdapter itemsAdapter = new ListNotifyAdapter(this, R.layout.list_item_bluetooth, items);
+        setListAdapter(itemsAdapter);
+        setTitle(getString(R.string.Checks_closed) + getString(R.string.qty) + listView.getCount()); //установить заголовок
+    }
 
+    private class ListCheckViewBinder implements SimpleCursorAdapter.ViewBinder {
+        private int direct;
+
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+
+            switch (view.getId()) {
+                case R.id.gross:
+                    direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
+                    if (direct == CheckDBAdapter.DIRECT_UP) {
+                        setViewText((TextView) view, getString(R.string.Tape));
+                    } else {
+                        setViewText((TextView) view, getString(R.string.Gross));
+                    }
+                    break;
+                case R.id.tare:
+                    direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
+                    if (direct == CheckDBAdapter.DIRECT_DOWN) {
+                        setViewText((TextView) view, getString(R.string.Tape));
+                    } else {
+                        setViewText((TextView) view, getString(R.string.Gross));
+                    }
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+
+        public void setViewText(TextView v, CharSequence text) {
+            v.setText(text);
+        }
+    }
+
+    public class ListNotifyAdapter extends ArrayAdapter<TaskCommand.ObjParcel> {
+        final int mLayout;
+
+        public ListNotifyAdapter(Context ctx, int layout, List<TaskCommand.ObjParcel> items) {
+            super(ctx, layout, items);
+            mLayout = layout;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            int item = getItem(position).getIntValue();
+            String str = getItem(position).getStrValue();
+
+
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(mLayout, parent, false);
+            }
+            // Lookup view for data population
+            TextView textTop = (TextView) convertView.findViewById(R.id.topText);
+            TextView textBottom = (TextView) convertView.findViewById(R.id.bottomText);
+            // Populate the data into the template view using the data object
+
+            textTop.setText(getString(R.string.Check_N) + item);
+            textBottom.setText(str);
+
+            // Return the completed view to render on screen
+            return convertView;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return getItem(position).getIntValue();
+        }
+    }
 }

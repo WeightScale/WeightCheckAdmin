@@ -29,7 +29,7 @@
                     android:layout_width="@dimen/width_button"
                     android:layout_height="wrap_content"
                     android:id="@+id/buttonBack" android:src="@drawable/ic_action_back" style="@style/CustomButtonImage"
-                    android:background="@drawable/image_selector" android:clickable="true"
+                    android:clickable="true"
                     android:contentDescription="@string/Come_back"/>
         </LinearLayout>
     </LinearLayout>

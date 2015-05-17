@@ -56,6 +56,15 @@
         <item name="android:textColor">@color/text</item>
         <item name="android:gravity">center</item>
     </style>
+    <style name="ButtonImageAdmin">
+        <item name="android:background">@drawable/image_selector</item>
+        <item name="android:layout_margin">@dimen/corners3</item>
+        <item name="android:padding">@dimen/corners3</item>
+        <!--<item name="android:layout_marginTop">20dip</item>
+        <item name="android:layout_marginRight">20dip</item>
+        <item name="android:layout_marginBottom">20dip</item>-->
+        <item name="android:clickable">true</item>
+    </style>
     <!--<style name="CustomImageView">
         <item name="android:background">@drawable/image_selector</item>
         &lt;!&ndash;<item name="android:selectable">@drawable/image_selector</item>&ndash;&gt;
@@ -76,24 +85,46 @@
     <style name="CustomButtonImage">
         <item name="android:background">@drawable/image_selector</item>
         <item name="android:layout_marginLeft">@dimen/corners3</item>
-        <item name="android:layout_marginTop">@dimen/corners</item>
+        <!--<item name="android:layout_marginTop">@dimen/corners</item>-->
         <item name="android:layout_marginRight">@dimen/corners3</item>
-        <item name="android:layout_marginBottom">@dimen/corners</item>
+        <!--<item name="android:layout_marginBottom">@dimen/corners</item>-->
         <item name="android:clickable">true</item>
+        <item name="android:paddingTop">@dimen/corners</item>
+        <item name="android:paddingBottom">@dimen/corners</item>
     </style>
-    <style name="ButtonImageAdmin">
-        <item name="android:background">@drawable/image_selector</item>
-        <item name="android:layout_margin">@dimen/corners3</item>
-        <item name="android:padding">@dimen/corners3</item>
-        <!--<item name="android:layout_marginTop">20dip</item>
-        <item name="android:layout_marginRight">20dip</item>
-        <item name="android:layout_marginBottom">20dip</item>-->
-        <item name="android:clickable">true</item>
-    </style>
+    <!-- <style name="CustomButtonSearch">
+         <item name="android:background">@drawable/design1</item>
+         <item name="android:textColor">@drawable/text_button_search_selector</item>
+         <item name="android:gravity">center</item>
+         <item name="android:textStyle">bold</item>
+     </style>-->
     <style name="CustomSpinner" parent="android:Widget.Spinner">
-        <item name="android:background">@drawable/spinner_background_ab</item>
+        <item name="android:background">@drawable/spinner_background</item>
         <item name="android:clickable">true</item>
+        <item name="android:layout_width">wrap_content</item>
     </style>
+    <!--<style name="spinner_style">
+        &lt;!&ndash;<item name="android:background">@drawable/gradient_spinner</item>&ndash;&gt;
+        <item name="android:layout_marginLeft">5dp</item>
+        <item name="android:layout_marginRight">5dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:popupBackground">#DFFFFFFF</item>
+    </style>-->
+
+    <!--<style name="progress_bar_style">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTitleStyle">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>-->
 
     <!--<style name="CustomAlertDialogStyle" parent="android:Theme.Dialog">
         <item name="@android:background">@android:color/background_light</item>
@@ -172,10 +203,21 @@
         <item name="android:layout_width">@dimen/width_battery</item>
         <item name="android:indeterminateOnly">false</item>
         <item name="android:progressDrawable">@drawable/battery</item>
-        <item name="android:background">@drawable/battery_low</item>
+        <item name="android:background">@drawable/b_low</item>
         <item name="android:max">100</item>
-        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingTop">6dp</item>
         <item name="android:paddingBottom">3dp</item>
+    </style>
+
+    <style name="CustomTabWidget" parent="@android:style/Widget.TabWidget">
+        <item name="android:textAppearance">@style/CustomTabWidgetText</item>
+    </style>
+    <style name="CustomTabWidgetText" parent="@android:style/TextAppearance.Widget.TabWidget">
+        <item name="android:textSize">@dimen/text_small</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:padding">@dimen/corners</item>
+        <!--<item name="android:layout_margin">@dimen/padding</item>-->
     </style>
 
 </resources>

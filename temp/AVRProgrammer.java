@@ -1,4 +1,4 @@
-package com.kostya.bootloader;
+package com.kostya.weightcheckadmin.bootloader;
 
 import android.os.Handler;
 import com.kostya.weightcheckadmin.Scales;

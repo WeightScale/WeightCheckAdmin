@@ -1,14 +1,17 @@
-package com.kostya.bootloader;
+package com.kostya.weightcheckadmin.bootloader;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.*;
 import android.view.View;
 import android.widget.*;
+import com.konst.bootloader.AVRProgrammer;
+import com.konst.bootloader.HandlerBootloader;
+import com.konst.module.ScaleModule;
 import com.kostya.weightcheckadmin.*;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.io.InputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,10 +24,10 @@ public class ActivityBootloader extends Activity {
     private ImageView startBoot;
     private TextView textViewLog;
     private ProgressDialog progressDialog;
-    private Handler handler;
+    private HandlerBootloader handler;
 
-    private AVRProgrammer prog;
-    private AVRDevice avr;
+    private AVRProgrammer programmer;
+    //private AVRDevice avr;
     boolean flag_programs_finish = true;
 
     private String deviceFileName = "atmega88"; // Specified device name.
@@ -43,7 +46,7 @@ public class ActivityBootloader extends Activity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                doDeviceDependent(prog, avr, handler);
+                programmer.doDeviceDependent();
             } catch (Exception e) {
                 handler.sendMessage(handler.obtainMessage(1, e.getMessage() + " \r\n"));
             }
@@ -72,7 +75,7 @@ public class ActivityBootloader extends Activity {
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     deviceFileName = adapterView.getItemAtPosition(i).toString();
                     try {
-                        doJob();
+                        setupProgrammer();
                         startBoot.setEnabled(true);
                     } catch (Exception e) {
                         handler.sendMessage(handler.obtainMessage(1, e.getMessage() + " \r\n"));
@@ -81,8 +84,7 @@ public class ActivityBootloader extends Activity {
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
+                public void onNothingSelected(AdapterView<?> adapterView) {}
             });
 
             ArrayAdapter<String> adapterBoot = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getAssets().list(dirBootFiles));
@@ -96,15 +98,14 @@ public class ActivityBootloader extends Activity {
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
+                public void onNothingSelected(AdapterView<?> adapterView) {}
             });
 
         } catch (IOException e) {
             log(e.getMessage() + "\r\n");
         }
 
-        handler = new Handler() {
+        handler = new HandlerBootloader() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case 1:
@@ -140,15 +141,15 @@ public class ActivityBootloader extends Activity {
         startBoot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!Scales.isProgrammerId()) {
-                    Scales.disconnect();
+                if (!programmer.isProgrammerId()) {
+                    scaleModule.dettach();
                     new ActivitySearch().log("Не программатор");
                     finish();
                     return;
                 }
 
                 try {
-                    if (prog.checkSignature(avr.getSignature0(), avr.getSignature1(), avr.getSignature2())) {
+                    if (programmer.checkSignature(programmer.getAvrDevice().getSignature0(), programmer.getAvrDevice().getSignature1(), programmer.getAvrDevice().getSignature2())) {
                         log("Проверка сигнатуры устройства!\r\n");
                         flag_programs_finish = false;
                         new ThreadDoDeviceDependent().execute();
@@ -172,28 +173,43 @@ public class ActivityBootloader extends Activity {
         textViewLog.append(string);
     }
 
-    void doJob() throws Exception {
+    void setupProgrammer() throws Exception {
 
-        prog = new AVRProgrammer(handler);
+        programmer = new AVRProgrammer(handler) {
+            @Override
+            public void sendByte(byte b) {
+
+            }
+
+            @Override
+            public int getByte() {
+                return 0;
+            }
+        };
         if (deviceFileName.length() == 0) {
             log("Device name not specified!\r\n");
             return;
         }
-        avr = new AVRDevice(dirDeviceFiles + "/" + deviceFileName, getApplicationContext(), handler);
-        log("Parsing XML file for device parameters...\r\n");
-        avr.readParametersFromAVRStudio();
+        InputStream inputDeviceFile = getAssets().open(dirDeviceFiles + '/' + deviceFileName);
+        InputStream inputHexFile = getAssets().open(dirBootFiles + '/' + bootFileName);
+
+        programmer.doJob(inputDeviceFile, inputHexFile);
+
+        //avr = new AVRDevice(dirDeviceFiles + "/" + deviceFileName, getApplicationContext(), handler);
+        //log("Parsing XML file for device parameters...\r\n");
+        //avr.readParametersFromAVRStudio();
     }
 
-    void doDeviceDependent(AVRProgrammer prog, AVRDevice avr, Handler _handler) throws Exception {
+    /*void doDeviceDependent(AVRProgrammer prog, AVRDevice avr, Handler _handler) throws Exception {
         HEXFile hex = null;
         HEXFile hex_v; // Used for verifying memory contents.
         int pos; // Used when comparing data.
         //long bits = 0; // Used for lock and fuse bits.
 
-	    /* Set programmer pagesize */
+	    *//* Set programmer pagesize *//*
         prog.setPagesize(avr.getPageSize());
 
-	    /* Check if specified address limits are within device range */
+	    *//* Check if specified address limits are within device range *//*
         if (flashEndAddress != -1) {
             if (flashEndAddress >= avr.getFlashSize())
                 throw new Exception("Specified Flash address range is outside device address space!");
@@ -210,7 +226,7 @@ public class ActivityBootloader extends Activity {
             eepromEndAddress = avr.getEEPROMSize() - 1;
         }
 
-	    /* Erase chip before programming anything? */
+	    *//* Erase chip before programming anything? *//*
         boolean chipErase = true;
         if (chipErase) {
             _handler.sendMessage(_handler.obtainMessage(1, "Erasing chip contents...\r\n"));
@@ -219,29 +235,29 @@ public class ActivityBootloader extends Activity {
         }
 
 
-	    /* Prepare input hex file for flash */
+	    *//* Prepare input hex file for flash *//*
         int memoryFillPattern = -1;
         boolean verifyFlash = true;
         boolean programFlash = true;
         if (programFlash || verifyFlash) {
-            /* Check that filename has been specified */
+            *//* Check that filename has been specified *//*
             if (bootFileName.length() == 0)
                 throw new Exception("Cannot program or verify Flash without input file specified!");
 
-		    /* Prepare the file */
+		    *//* Prepare the file *//*
             hex = new HEXFile(avr.getFlashSize(), (byte) 0xff, getApplicationContext(), _handler);
 
-		    /* Fill if wanted */
+		    *//* Fill if wanted *//*
             if (memoryFillPattern != -1)
                 hex.clearAll((byte) memoryFillPattern);
 
-		    /* Read file */
+		    *//* Read file *//*
             _handler.sendMessage(_handler.obtainMessage(1, "Reading HEX input file for flash operations...\r\n"));
             _handler.sendMessage(_handler.obtainMessage(2, flashEndAddress, 0, "Reading HEX..."));
             //hex.readFile(hex.getFieldFile(inputFileFlash));dirDeviceFiles+"/"+ deviceFileName
             hex.readFile(dirBootFiles + "/" + bootFileName);
 
-		    /* Check limits */
+		    *//* Check limits *//*
             if (hex.getRangeStart() > flashEndAddress || hex.getRangeEnd() < flashStartAddress)
                 throw new Exception("HEX file defines data outside specified range!");
 
@@ -256,9 +272,9 @@ public class ActivityBootloader extends Activity {
             hex.setUsedRange(flashStartAddress, (15 - (flashEndAddress % 16)) + flashEndAddress);
         }
 
-	    /* Program new Flash contents? */
+	    *//* Program new Flash contents? *//*
         if (programFlash) {
-		    /* Program data */
+		    *//* Program data *//*
             _handler.sendMessage(_handler.obtainMessage(1, "Programming Flash contents...\r\n"));
             _handler.sendMessage(_handler.obtainMessage(2, flashEndAddress, 0, "Programming Flash..."));
             if (!prog.writeFlash(hex)) {
@@ -269,12 +285,12 @@ public class ActivityBootloader extends Activity {
         }
 
 
-	    /* Verify Flash contents? */
+	    *//* Verify Flash contents? *//*
         if (verifyFlash) {
-		    /* Prepare HEX file for comparision */
+		    *//* Prepare HEX file for comparision *//*
             hex_v = new HEXFile(avr.getFlashSize(), (byte) 0xff, getApplicationContext(), _handler);
 
-		    /* Compare to Flash */
+		    *//* Compare to Flash *//*
             _handler.sendMessage(_handler.obtainMessage(1, "Reading Flash contents...\r\n"));
             _handler.sendMessage(_handler.obtainMessage(2, flashEndAddress, 0, "Reading Flash..."));
             hex_v.setUsedRange(hex.getRangeStart(), hex.getRangeEnd());
@@ -284,7 +300,7 @@ public class ActivityBootloader extends Activity {
             }
             _handler.sendMessage(_handler.obtainMessage(4));
 
-		    /* Compare data */
+		    *//* Compare data *//*
             _handler.sendMessage(_handler.obtainMessage(1, "Comparing Flash data...\r\n"));
             _handler.sendMessage(_handler.obtainMessage(2, flashEndAddress, 0, "Comparing Flash data..."));
             for (pos = hex.getRangeStart(); pos <= hex.getRangeEnd(); pos++) {
@@ -305,11 +321,18 @@ public class ActivityBootloader extends Activity {
         _handler.sendMessage(_handler.obtainMessage(1, "Exit bootloader\r\n"));
         flag_programs_finish = true;
 
-    }
+    }*/
+
+    ScaleModule scaleModule = new ScaleModule() {
+        @Override
+        public void handleModuleConnect(Result result) {
+
+        }
+    };
 
     void exit() {
         if (flag_programs_finish) {
-            Scales.disconnect();
+            scaleModule.dettach();
             finish();
         }
     }

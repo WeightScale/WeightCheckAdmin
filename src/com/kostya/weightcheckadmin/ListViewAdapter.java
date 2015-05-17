@@ -26,15 +26,10 @@ public class ListViewAdapter extends ArrayAdapter<Component> {
 
         Component cp = getItem(position);
         TextView title = (TextView) curView.findViewById(R.id.title);
-        //TextView subtitle = (TextView) curView.findViewById (R.id.subtitle);
-
-
         title.setText(cp.getTitle());
-        //subtitle.setText(cp.getSubtitle());
-
         return curView;
-
     }
+
 
 }
 
@@ -51,7 +46,7 @@ class Component {
     }
 
 
-    public String getTitle() {
+    public CharSequence getTitle() {
         return title;
     }
 

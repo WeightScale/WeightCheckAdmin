@@ -4,7 +4,7 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" android:padding="@dimen/padding"
-        android:visibility="visible" android:id="@+id/searchScreen" android:background="@color/background_light">
+        android:visibility="visible" android:id="@+id/searchScreen">
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
@@ -41,25 +41,25 @@
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
-            <ImageView
+            <!--<ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/buttonMenu" android:src="@drawable/ic_action_sett" android:layout_weight="1"
                     style="@style/CustomButtonImage" android:clickable="true"
-                    android:contentDescription="@string/Menu_settings"/>
+                    android:contentDescription="@string/Menu_settings"/>-->
             <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/buttonSearchBluetooth" android:src="@drawable/ic_action_bluetooth"
                     android:layout_weight="1"
-                    style="@style/CustomButtonImage" android:background="@drawable/image_selector"
-                    android:contentDescription="@string/Search_scale"/>
+                    style="@style/CustomButtonImage"
+                    android:contentDescription="@string/Search_scale" android:clickable="true"/>
             <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/buttonBack" android:src="@drawable/ic_action_back" android:layout_weight="1"
                     style="@style/CustomButtonImage" android:clickable="true"
-                    android:background="@drawable/image_selector" android:contentDescription="@string/Come_back"/>
+                    android:contentDescription="@string/Come_back"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
