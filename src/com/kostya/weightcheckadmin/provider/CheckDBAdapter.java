@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import com.konst.module.ScaleModule;
-import com.konst.module.Versions;
 import com.kostya.weightcheckadmin.R;
 import com.kostya.weightcheckadmin.TaskCommand;
 
@@ -131,16 +130,16 @@ public class CheckDBAdapter {
     public void deleteCheckIsServer(/*long  dayAfter*/) {
         try {
             Cursor result = contentResolver.query(CONTENT_URI, new String[]{KEY_ID, KEY_DATE_CREATE},
-                KEY_CHECK_ON_SERVER + "= 1" + " and " + KEY_VISIBILITY + "= " + INVISIBLE, null, null);
-        if (result.getCount() > 0) {
-            result.moveToFirst();
-            if (!result.isAfterLast()) {
-                do {
-                    int id = result.getInt(result.getColumnIndex(KEY_ID));
-                    removeEntry(id);
-                } while (result.moveToNext());
+                    KEY_CHECK_ON_SERVER + "= 1" + " and " + KEY_VISIBILITY + "= " + INVISIBLE, null, null);
+            if (result.getCount() > 0) {
+                result.moveToFirst();
+                if (!result.isAfterLast()) {
+                    do {
+                        int id = result.getInt(result.getColumnIndex(KEY_ID));
+                        removeEntry(id);
+                    } while (result.moveToNext());
+                }
             }
-    }
             result.close();
         } catch (Exception e) {}
     }
@@ -167,9 +166,9 @@ public class CheckDBAdapter {
                     }
                 } while (result.moveToNext());
             }
-                result.close();
+            result.close();
         }catch (Exception e){}
-            }
+    }
 
     long dayDiff(Date d1, Date d2) {
         final long DAY_MILLIS = 1000 * 60 * 60 * 24;
@@ -183,13 +182,13 @@ public class CheckDBAdapter {
         try {
             Cursor result = contentResolver.query(uri, new String[]{KEY_ID, key}, null, null, null);
             result.moveToFirst();
-        String str = result.getString(result.getColumnIndex(key));
-        result.close();
-        return str;
+            String str = result.getString(result.getColumnIndex(key));
+            result.close();
+            return str;
         }catch (Exception e){
             return "";
-    }
         }
+    }
 
     public Cursor getAllEntries(int view) {
         return contentResolver.query(CONTENT_URI, All_COLUMN_CHECKS_TABLE, KEY_IS_READY + "= 1" + " and " + KEY_VISIBILITY + "= " + view, null, null);
@@ -201,7 +200,7 @@ public class CheckDBAdapter {
 
     public Cursor getNotReady() {
         return contentResolver.query(CONTENT_URI, All_COLUMN_CHECKS_TABLE, KEY_IS_READY + "= 0", null, null);
-        }
+    }
 
     public Cursor getEntryItem(int _rowIndex) {
         Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
@@ -224,15 +223,15 @@ public class CheckDBAdapter {
             return map.get(String.valueOf(_rowIndex));
         }catch (Exception e){
             throw new Exception(e);
-    }
+        }
     }
 
     public boolean updateEntry(int _rowIndex, String key, int in) {
         //boolean b;
         Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
         try {
-        ContentValues newValues = new ContentValues();
-        newValues.put(key, in);
+            ContentValues newValues = new ContentValues();
+            newValues.put(key, in);
             return contentResolver.update(uri, newValues, null, null) > 0;
         }catch (Exception e){return false;}
     }
@@ -249,8 +248,8 @@ public class CheckDBAdapter {
     public void updateEntry(int _rowIndex, String key, float fl) {
         Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
         try {
-        ContentValues newValues = new ContentValues();
-        newValues.put(key, fl);
+            ContentValues newValues = new ContentValues();
+            newValues.put(key, fl);
             contentResolver.update(uri, newValues, null, null);
         }catch (Exception e){}
     }
@@ -258,8 +257,8 @@ public class CheckDBAdapter {
     public boolean updateEntry(int _rowIndex, String key, String st) {
         Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
         try {
-        ContentValues newValues = new ContentValues();
-        newValues.put(key, st);
+            ContentValues newValues = new ContentValues();
+            newValues.put(key, st);
             return contentResolver.update(uri, newValues, null, null) > 0;
         }catch (Exception e){ return false;}
     }
@@ -281,10 +280,10 @@ public class CheckDBAdapter {
                                 taskTable.insertNewTask(TaskCommand.TaskType.TYPE_CHECK_SEND_SHEET_DISK, _rowIndex, senderId, "");
                                 break;
                             case TYPE_EMAIL:
-                                taskTable.insertNewTask(TaskCommand.TaskType.TYPE_CHECK_SEND_MAIL_ADMIN, _rowIndex, senderId, Versions.username);
+                                taskTable.insertNewTask(TaskCommand.TaskType.TYPE_CHECK_SEND_MAIL_ADMIN, _rowIndex, senderId, ScaleModule.getUserName());
                                 break;
                             case TYPE_SMS:
-                                taskTable.insertNewTask(TaskCommand.TaskType.TYPE_CHECK_SEND_SMS_ADMIN, _rowIndex, senderId, Versions.phone);
+                                taskTable.insertNewTask(TaskCommand.TaskType.TYPE_CHECK_SEND_SMS_ADMIN, _rowIndex, senderId, ScaleModule.getPhone());
                                 break;
                             default:
                         }

@@ -48,9 +48,9 @@ public class BatteryProgressBar extends ProgressBar {
         if (progress > 15) {
             if (progress < 50) {
                 setTextColor(Color.BLACK);
-        } else {
-            setTextColor(Color.WHITE);
-        }
+            } else {
+                setTextColor(Color.WHITE);
+            }
             setProgressDrawable(dBattery);
         } else if (progress > 0) {
             setTextColor(Color.BLACK);

@@ -65,10 +65,10 @@ public class TaskMessageDialog {
                     Uri uri = ContentUris.withAppendedId(ContactsContract.CommonDataKinds.Email.CONTENT_URI, id);
                     Cursor result = contentResolver.query(uri, new String[]{ContactsContract.CommonDataKinds.Email.DATA}, null, null, null);
                     if (result != null) {
-                    if (result.moveToFirst()) {
-                        String str = result.getString(result.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                        if (result.moveToFirst()) {
+                            String str = result.getString(result.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
                             taskTable.insertNewTask(TaskCommand.TaskType.TYPE_CHECK_SEND_MAIL_CONTACT, mCheckId, mContactId, str);
-                    }
+                        }
                     }
                     dialog.dismiss();
                 }
@@ -139,8 +139,8 @@ public class TaskMessageDialog {
                         openListEmailDialog();
                     } else {
                         Toast.makeText(mContext, mContext.getString(R.string.TEXT_MESSAGE11), Toast.LENGTH_LONG).show();
+                    }
                 }
-            }
             }
         });
         alertDialog.show();
@@ -160,7 +160,7 @@ public class TaskMessageDialog {
             values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
             values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-            values.put(ContactsContract.CommonDataKinds.Email.ADDRESS, mail);
+                values.put(ContactsContract.CommonDataKinds.Email.ADDRESS, mail);
             else
                 values.put(ContactsContract.CommonDataKinds.Email.DISPLAY_NAME, mail);
             values.put(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_WORK);
@@ -267,8 +267,8 @@ public class TaskMessageDialog {
                         openListPhoneDialog();
                     } else {
                         Toast.makeText(mContext, mContext.getString(R.string.TEXT_MESSAGE12), Toast.LENGTH_LONG).show();
+                    }
                 }
-            }
             }
         });
         alertDialog.show();
@@ -302,7 +302,7 @@ public class TaskMessageDialog {
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
             if(view.getId() == R.id.title){
                 ((TextView)view).setCompoundDrawablesWithIntrinsicBounds(res, 0, 0, 0);
-                        ((TextView) view).setText(cursor.getString(columnIndex));
+                ((TextView) view).setText(cursor.getString(columnIndex));
             }
             return true;
         }

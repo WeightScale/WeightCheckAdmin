@@ -67,11 +67,11 @@ public class GoogleSpreadsheets {
                 if (spreadsheet.getTitle().getPlainText().equals(nameSheet)) {
                     spreadsheetEntry = spreadsheet;
                     return spreadsheetEntry;
-    }
-    }
                 }
-        throw new Exception("Нет Таблицы с именем " + nameSheet);
             }
+        }
+        throw new Exception("Нет Таблицы с именем " + nameSheet);
+    }
 
     /*String getSpreadsheetName() {
         return spreadsheetName;
@@ -120,7 +120,7 @@ public class GoogleSpreadsheets {
                 UpdateListWorksheets();
                 //todo проверить добавлены все названия столбцов
             }
-                } catch (ServiceException e) {
+        } catch (ServiceException e) {
             throw new Exception("506 " + e.getMessage());//new ErrorDBAdapter(context).insertNewEntry("506", e.getMessage());
         } catch (Exception ignored) {
             throw new Exception("507 " + ignored.getMessage());//new ErrorDBAdapter(context).insertNewEntry("507", ignored.getMessage());

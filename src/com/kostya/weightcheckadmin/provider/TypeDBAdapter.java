@@ -44,14 +44,14 @@ public class TypeDBAdapter {
     private int getKeyInt(int _rowIndex, String key) {
         Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
         try {
-        Cursor result = context.getContentResolver().query(uri, new String[]{KEY_ID, key}, null, null, null);
+            Cursor result = context.getContentResolver().query(uri, new String[]{KEY_ID, key}, null, null, null);
             int in = -1;
             if (result.getCount() > 0) {
                 result.moveToFirst();
                 in = result.getInt(result.getColumnIndex(key));
-        }
-        result.close();
-        return in;
+            }
+            result.close();
+            return in;
         }catch (Exception e){return -1;}
     }
 
@@ -82,9 +82,9 @@ public class TypeDBAdapter {
     public boolean updateEntry(int _rowIndex, String key, int in) {
         Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
         try {
-        ContentValues newValues = new ContentValues();
-        newValues.put(key, in);
-        return context.getContentResolver().update(uri, newValues, null, null) > 0;
+            ContentValues newValues = new ContentValues();
+            newValues.put(key, in);
+            return context.getContentResolver().update(uri, newValues, null, null) > 0;
         }catch (Exception e){return false;}
 
     }

@@ -92,9 +92,9 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
         try {
             String contact = getIntent().getStringExtra("nameFilter");
             if (!contact.isEmpty()) {
-                    layoutSearch.setVisibility(View.VISIBLE);
+                layoutSearch.setVisibility(View.VISIBLE);
                 textSearch.setText(contact);
-                    textSearch.requestFocus();
+                textSearch.requestFocus();
             }
         } catch (Exception e) {
 
@@ -121,7 +121,7 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
     void setupList() {
         String[] from;
         from = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ? new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.PHOTO_URI} : new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY};
-            int[] to = {R.id.contactName, R.id.contactPhoto};
+        int[] to = {R.id.contactName, R.id.contactPhoto};
         adapter = new SimpleCursorAdapter(this, R.layout.item_contact, getContact(), from, to);
         adapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
@@ -129,7 +129,7 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
                 return new FilterCursorWrapper(getContact(), constraint.toString(), ContactsContract.Contacts.DISPLAY_NAME);
             }
         });
-            setListAdapter(adapter);
+        setListAdapter(adapter);
     }
 
     Cursor getContact() {
@@ -212,13 +212,13 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
         if (action != null) {
             switch (action) {
                 case "check":
-                String name = retrieveContactName(contactUri);
-                String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_DOWN).getLastPathSegment();
+                    String name = retrieveContactName(contactUri);
+                    String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_DOWN).getLastPathSegment();
                     startActivity(new Intent().setClass(getApplicationContext(), ActivityCheck.class).putExtra("id", entryID));
-                finish();
+                    finish();
                     break;
                 /*case "down":
-                String name = retrieveContactName(contactUri);
+                    String name = retrieveContactName(contactUri);
                     String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_DOWN).getLastPathSegment();
                     //startActivity(new Intent().setClass(getApplicationContext(), ActivityInputCheck.class).putExtra("id", entryID));
                     startActivity(new Intent().setClass(getApplicationContext(), ActivityCheck.class).putExtra("id", entryID));
@@ -226,13 +226,13 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
                 break;
                 case "up":
                     String name = retrieveContactName(contactUri);
-                String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_UP).getLastPathSegment();
-                startActivity(new Intent().setClass(getApplicationContext(), ActivityOutputCheck.class).putExtra("id", entryID));
-                finish();
+                    String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_UP).getLastPathSegment();
+                    startActivity(new Intent().setClass(getApplicationContext(), ActivityOutputCheck.class).putExtra("id", entryID));
+                    finish();
                 break;*/
                 case "contact":
-                Intent intent = new Intent(Intent.ACTION_VIEW, contactUri);
-                startActivity(intent);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, contactUri);
+                    startActivity(intent);
                     break;
             }
         }
@@ -261,7 +261,7 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
                 layoutSearch.setVisibility(View.GONE);
                 break;
         }
-        }
+    }
 
     private class FilterCursorWrapper extends CursorWrapper {
 
@@ -290,8 +290,8 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
                     for (String str : split) {
                         if (str.trim().startsWith(this.filter)) {
                             index[pos++] = i;
+                        }
                     }
-                }
                 }
                 count = pos;
                 pos = 0;

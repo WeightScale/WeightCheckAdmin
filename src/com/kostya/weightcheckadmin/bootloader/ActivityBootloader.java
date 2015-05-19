@@ -325,9 +325,15 @@ public class ActivityBootloader extends Activity {
 
     ScaleModule scaleModule = new ScaleModule() {
         @Override
-        public void handleModuleConnect(Result result) {
+        public void handleResultConnect(ResultConnect resultConnect) {
 
         }
+
+        @Override
+        public void handleConnectError(Error error, String s) {
+
+        }
+
     };
 
     void exit() {

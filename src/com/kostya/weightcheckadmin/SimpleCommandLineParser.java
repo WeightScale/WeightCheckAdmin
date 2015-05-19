@@ -18,8 +18,8 @@ public class SimpleCommandLineParser {
             String[] str = anArg.split(predict, 2);
             if (str.length > 1) {
                 argMap.put(str[0], str[1]);
+            }
         }
-    }
     }
 
     public String getValue(String... keys) {

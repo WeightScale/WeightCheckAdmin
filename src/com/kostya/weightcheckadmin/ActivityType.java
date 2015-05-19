@@ -61,23 +61,23 @@ public class ActivityType extends ListActivity implements View.OnClickListener {
         updateList();
     }
 
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.buttonBack:
-                    onBackPressed();
-                    break;
-                case R.id.buttonNew:
-                    input = new EditText(getBaseContext());
-                    dialog.setView(input);
-                    dialog.show();
-                    break;
-            }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.buttonBack:
+                onBackPressed();
+                break;
+            case R.id.buttonNew:
+                input = new EditText(getBaseContext());
+                dialog.setView(input);
+                dialog.show();
+                break;
         }
+    }
 
     void updateList() {
         try {
-        Cursor cursor = typeDBAdapter.getNotSystemEntries();
+            Cursor cursor = typeDBAdapter.getNotSystemEntries();
             String[] from = {TypeDBAdapter.KEY_TYPE};
             int[] to = {R.id.topText};
             ListAdapter adapter = new SimpleCursorAdapter(this, R.layout.list_item_type, cursor, from, to);
@@ -91,10 +91,10 @@ public class ActivityType extends ListActivity implements View.OnClickListener {
         ListView list = getListView();
         int position = list.getPositionForView(view);
         try {
-        Cursor cursor = ((CursorAdapter) list.getAdapter()).getCursor();
-        cursor.moveToPosition(position);
-        int id = cursor.getInt(cursor.getColumnIndex(TypeDBAdapter.KEY_ID));
-        typeDBAdapter.removeEntry(id);
+            Cursor cursor = ((CursorAdapter) list.getAdapter()).getCursor();
+            cursor.moveToPosition(position);
+            int id = cursor.getInt(cursor.getColumnIndex(TypeDBAdapter.KEY_ID));
+            typeDBAdapter.removeEntry(id);
         }catch (Exception e){
             return;
         }

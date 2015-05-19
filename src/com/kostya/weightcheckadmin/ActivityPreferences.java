@@ -11,7 +11,6 @@ import android.preference.PreferenceManager;
 import android.widget.Toast;
 import com.konst.module.InterfaceScaleModule;
 import com.konst.module.ScaleModule;
-import com.konst.module.Versions;
 import com.kostya.weightcheckadmin.bootloader.ActivityBootloader;
 import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
 import com.kostya.weightcheckadmin.provider.PreferencesDBAdapter;
@@ -56,25 +55,25 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
         if (name != null) {
             try {
                 name.setSummary(ScaleModule.getName());
-            name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object o) {
-                    if (o.toString().isEmpty()) {
+                name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        if (o.toString().isEmpty()) {
+                            Toast.makeText(getBaseContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
+                            return false;
+                        }
+                        if (ScaleModule.setModuleName(o.toString())) {
+                            preference.setSummary(o.toString());
+                            Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + o.toString(), Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
                         Toast.makeText(getBaseContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
                         return false;
                     }
-                        if (ScaleModule.setModuleName(o.toString())) {
-                        preference.setSummary(o.toString());
-                            Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + o.toString(), Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    Toast.makeText(getBaseContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });
+                });
             } catch (Exception e) {
                 name.setEnabled(false);
-        }
+            }
         }
 
         name = findPreference(KEY_ADDRESS);
@@ -84,7 +83,7 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
 
         name = findPreference(KEY_TIMER);
         if (name != null) {
-            name.setTitle(getString(R.string.Timer_off) + ' ' + Versions.timeOff + ' ' + getString(R.string.minute));
+            name.setTitle(getString(R.string.Timer_off) + ' ' + ScaleModule.getTimeOff() + ' ' + getString(R.string.minute));
             name.setSummary(getString(R.string.sum_timer) + ' ' + getString(R.string.range) + Main.default_min_time_off + getString(R.string.to) + Main.default_max_time_off);
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -97,9 +96,9 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                     }
 
                     if (ScaleModule.setModuleTimeOff(Integer.valueOf(o.toString()))) {
-                        Versions.timeOff = Integer.valueOf(o.toString());
-                        preference.setTitle(getString(R.string.Timer_off) + ' ' + Versions.timeOff + ' ' + getString(R.string.minute));
-                        Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + Versions.timeOff + ' ' + getString(R.string.minute), Toast.LENGTH_SHORT).show();
+                        ScaleModule.setTimeOff(Integer.valueOf(o.toString()));
+                        preference.setTitle(getString(R.string.Timer_off) + ' ' + ScaleModule.getTimeOff() + ' ' + getString(R.string.minute));
+                        Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + ScaleModule.getTimeOff() + ' ' + getString(R.string.minute), Toast.LENGTH_SHORT).show();
                         return true;
                     }
                     Toast.makeText(getBaseContext(), R.string.preferences_no, Toast.LENGTH_SHORT).show();
@@ -130,7 +129,7 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
 
         name = findPreference(KEY_TIMER_NULL);
         if (name != null) {
-            name.setTitle(getString(R.string.Time) + ' ' + ScaleModule.timerNull + ' ' + getString(R.string.second));
+            name.setTitle(getString(R.string.Time) + ' ' + ScaleModule.getTimerNull() + ' ' + getString(R.string.second));
             name.setSummary(getString(R.string.sum_time_auto_zero) + ' ' + Main.default_max_time_auto_null + ' ' + getString(R.string.second));
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -140,10 +139,10 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                         return false;
                     }
 
-                    ScaleModule.timerNull = Integer.valueOf(o.toString());
-                    preference.setTitle(getString(R.string.Time) + ' ' + ScaleModule.timerNull + ' ' + getString(R.string.second));
-                    Preferences.write(KEY_TIMER_NULL, ScaleModule.timerNull);
-                    Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + ScaleModule.timerNull + ' ' + getString(R.string.second), Toast.LENGTH_SHORT).show();
+                    ScaleModule.setTimerNull(Integer.valueOf(o.toString()));
+                    preference.setTitle(getString(R.string.Time) + ' ' + ScaleModule.getTimerNull() + ' ' + getString(R.string.second));
+                    Preferences.write(KEY_TIMER_NULL, ScaleModule.getTimerNull());
+                    Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + ScaleModule.getTimerNull() + ' ' + getString(R.string.second), Toast.LENGTH_SHORT).show();
                     return true;
                 }
             });
@@ -151,7 +150,7 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
 
         name = findPreference(KEY_MAX_NULL);
         if (name != null) {
-            name.setTitle(getString(R.string.sum_weight) + ' ' + ScaleModule.weightError + ' ' + getString(R.string.scales_kg));
+            name.setTitle(getString(R.string.sum_weight) + ' ' + ScaleModule.getWeightError() + ' ' + getString(R.string.scales_kg));
             name.setSummary(getString(R.string.sum_max_null) + ' ' + Main.default_limit_auto_null + ' ' + getString(R.string.scales_kg));
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -161,10 +160,10 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                         return false;
                     }
 
-                    ScaleModule.weightError = Integer.valueOf(o.toString());
-                    preference.setTitle(getString(R.string.sum_weight) + ' ' + ScaleModule.weightError + ' ' + getString(R.string.scales_kg));
-                    Preferences.write(KEY_TIMER_NULL, ScaleModule.weightError);
-                    Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + ScaleModule.weightError + ' ' + getString(R.string.scales_kg), Toast.LENGTH_SHORT).show();
+                    ScaleModule.setWeightError(Integer.valueOf(o.toString()));
+                    preference.setTitle(getString(R.string.sum_weight) + ' ' + ScaleModule.getWeightError() + ' ' + getString(R.string.scales_kg));
+                    Preferences.write(KEY_TIMER_NULL, ScaleModule.getWeightError());
+                    Toast.makeText(getBaseContext(), getString(R.string.preferences_yes) + ' ' + ScaleModule.getWeightError() + ' ' + getString(R.string.scales_kg), Toast.LENGTH_SHORT).show();
                     return true;
                 }
             });
@@ -262,7 +261,7 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
 
         name = findPreference(KEY_FILTER);
         if (name != null) {
-            name.setTitle(getString(R.string.filter_adc) + ' ' + String.valueOf(Versions.filterADC));
+            name.setTitle(getString(R.string.filter_adc) + ' ' + String.valueOf(ScaleModule.getFilterADC()));
             name.setSummary(getString(R.string.sum_filter_adc) + ' ' + getString(R.string.The_range_is_from_0_to) + Main.default_adc_filter);
             name.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -273,8 +272,8 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                     }
 
                     if (ScaleModule.setModuleFilterADC(Integer.valueOf(o.toString()))) {
-                        Versions.filterADC = Integer.valueOf(o.toString());
-                        preference.setTitle(getString(R.string.filter_adc) + ' ' + String.valueOf(Versions.filterADC));
+                        ScaleModule.setFilterADC(Integer.valueOf(o.toString()));
+                        preference.setTitle(getString(R.string.filter_adc) + ' ' + String.valueOf(ScaleModule.getFilterADC()));
                         Toast.makeText(getBaseContext(), R.string.preferences_yes, Toast.LENGTH_SHORT).show();
                         return true;
                     }
@@ -283,6 +282,7 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                 }
             });
         }
+
 
         name = findPreference(KEY_ADMIN);
         if (name != null){
@@ -297,8 +297,8 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
 
         name = findPreference(KEY_UPDATE);
         if (name != null) {
-            if (ScaleModule.Version != null) {
-                if (ScaleModule.numVersion < Main.microSoftware) {
+            if (ScaleModule.getVersion() != null) {
+                if (ScaleModule.getNumVersion() < Main.microSoftware) {
                     name.setSummary(getString(R.string.Is_new_version));
                     name.setEnabled(true);
                 } else {
@@ -323,7 +323,7 @@ public class ActivityPreferences extends PreferenceActivity implements SharedPre
                         //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra(KEY_ADDRESS, ScaleModule.getAddress());
                         intent.putExtra(InterfaceScaleModule.CMD_HARDWARE, hardware);
-                        intent.putExtra(InterfaceScaleModule.CMD_VERSION, ScaleModule.numVersion);
+                        intent.putExtra(InterfaceScaleModule.CMD_VERSION, ScaleModule.getNumVersion());
                         startActivity(intent);
                         return false;
                     }

@@ -190,7 +190,7 @@ public class WeightCheckBaseProvider extends ContentProvider {
             ContentResolver contentResolver = context.getContentResolver();
             if (contentResolver != null) {
                 cursor.setNotificationUri(contentResolver, uri);
-        }
+            }
         }
         return cursor;
     }
@@ -203,8 +203,8 @@ public class WeightCheckBaseProvider extends ContentProvider {
             case SINGLE_ROWS:
                 return "vnd.android.cursor.item/vnd.";
             default:
-        return null;
-    }
+                return null;
+        }
     }
 
     @Override
@@ -292,7 +292,7 @@ public class WeightCheckBaseProvider extends ContentProvider {
         if (delCount > 0) {
             if (getContext() != null) {
                 getContext().getContentResolver().notifyChange(uri, null);
-        }
+            }
         }
 
         return delCount;
@@ -365,7 +365,7 @@ public class WeightCheckBaseProvider extends ContentProvider {
         if (updateCount > 0) {
             if (getContext() != null) {
                 getContext().getContentResolver().notifyChange(uri, null);
-        }
+            }
         }
 
         return updateCount;
@@ -395,7 +395,7 @@ public class WeightCheckBaseProvider extends ContentProvider {
             senderTable.addSystemHTTP(db);
             senderTable.addSystemMail(db);
             senderTable.addSystemSms(db);
-                }
+        }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -409,5 +409,5 @@ public class WeightCheckBaseProvider extends ContentProvider {
             db.execSQL(DROP_TABLE_IF_EXISTS + SenderDBAdapter.TABLE_SENDER);
             onCreate(db);
         }
-            }
+    }
 }

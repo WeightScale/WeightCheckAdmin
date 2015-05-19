@@ -35,7 +35,7 @@ public class TemperatureProgressBar extends ProgressBar {
     public synchronized void updateProgress(int temperature) {
         setProgress(0);
         if (temperature > -40)
-        setText(String.valueOf(temperature));
+            setText(String.valueOf(temperature));
         else
             setText("-");
         setProgress(temperature + mMinus);

@@ -53,7 +53,7 @@ class BluetoothListAdapter extends ArrayAdapter<BluetoothDevice> {
                     if ("-".equalsIgnoreCase(address)) {
                         tt.setTextColor(0xFFFF5050);
                     } else
-                        //tt.setTextColor(getContext().getResources().getColor(R.color.tt_item_bt));
+                    //tt.setTextColor(getContext().getResources().getColor(R.color.tt_item_bt));
                     {
                         tt.setTextColor(getContext().getResources().getColor(R.color.white));
                     }
