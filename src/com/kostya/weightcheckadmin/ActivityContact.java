@@ -14,7 +14,7 @@ import android.text.TextWatcher;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
+import com.kostya.weightcheckadmin.provider.CheckTable;
 
 /*
  * Created with IntelliJ IDEA.
@@ -25,7 +25,7 @@ import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
  */
 public class ActivityContact extends ListActivity implements View.OnClickListener {
 
-    private CheckDBAdapter checkDBAdapter;
+    private CheckTable checkTable;
     private Vibrator vibrator; //вибратор
     private EditText textSearch;
     private LinearLayout layoutSearch;
@@ -51,7 +51,7 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
         lp.screenBrightness = 1.0f;
         getWindow().setAttributes(lp);
 
-        checkDBAdapter = new CheckDBAdapter(this);
+        checkTable = new CheckTable(this);
 
         ListView listView = getListView();
         listView.setLongClickable(true);
@@ -119,8 +119,7 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
 
     //@TargetApi(Build.VERSION_CODES.HONEYCOMB)
     void setupList() {
-        String[] from;
-        from = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ? new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.PHOTO_URI} : new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY};
+        String[] from = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ? new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.PHOTO_URI} : new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY};
         int[] to = {R.id.contactName, R.id.contactPhoto};
         adapter = new SimpleCursorAdapter(this, R.layout.item_contact, getContact(), from, to);
         adapter.setFilterQueryProvider(new FilterQueryProvider() {
@@ -213,7 +212,7 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
             switch (action) {
                 case "check":
                     String name = retrieveContactName(contactUri);
-                    String entryID = checkDBAdapter.insertNewEntry(name, id, CheckDBAdapter.DIRECT_DOWN).getLastPathSegment();
+                    String entryID = checkTable.insertNewEntry(name, id, CheckTable.DIRECT_DOWN).getLastPathSegment();
                     startActivity(new Intent().setClass(getApplicationContext(), ActivityCheck.class).putExtra("id", entryID));
                     finish();
                     break;
@@ -234,6 +233,7 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
                     Intent intent = new Intent(Intent.ACTION_VIEW, contactUri);
                     startActivity(intent);
                     break;
+                default:
             }
         }
     }
@@ -260,10 +260,11 @@ public class ActivityContact extends ListActivity implements View.OnClickListene
                 textSearch.setText("");
                 layoutSearch.setVisibility(View.GONE);
                 break;
+            default:
         }
     }
 
-    private class FilterCursorWrapper extends CursorWrapper {
+    private static class FilterCursorWrapper extends CursorWrapper {
 
         private final String filter;
         private final int column;

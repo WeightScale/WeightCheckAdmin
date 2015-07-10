@@ -20,9 +20,9 @@ import java.util.Date;
  * Time: 14:15
  * To change this template use File | Settings | File Templates.
  */
-public class PreferencesDBAdapter {
+public class PreferencesTable {
     private final Context context;
-    public static final String TABLE_PREFERENCES = "preferencesTable";
+    public static final String TABLE = "preferencesTable";
 
     public static final String KEY_ID = BaseColumns._ID;
     public static final String KEY_DATE_CREATE = "dateCreate";
@@ -38,8 +38,8 @@ public class PreferencesDBAdapter {
     public static final String KEY_NUMBER_BT_TERMINAL = "numberBtTerminal";
     private static final String KEY_CHECK_ON_SERVER = "checkOnServer";
 
-    public static final String TABLE_CREATE_PREFERENCES = "create table "
-            + TABLE_PREFERENCES + " ("
+    public static final String TABLE_CREATE = "create table "
+            + TABLE + " ("
             + KEY_ID + " integer primary key autoincrement, "
             + KEY_DATE_CREATE + " text,"
             + KEY_TIME_CREATE + " text,"
@@ -54,19 +54,19 @@ public class PreferencesDBAdapter {
             + KEY_NUMBER_BT_TERMINAL + " text,"
             + KEY_CHECK_ON_SERVER + " integer );";
 
-    //static final String TABLE_PREFERENCES_PATH = TABLE_PREFERENCES;
-    private static final Uri CONTENT_URI = Uri.parse("content://" + WeightCheckBaseProvider.AUTHORITY + '/' + TABLE_PREFERENCES);
+    //static final String TABLE_PREFERENCES_PATH = TABLE;
+    private static final Uri CONTENT_URI = Uri.parse("content://" + WeightCheckBaseProvider.AUTHORITY + '/' + TABLE);
 
-    public PreferencesDBAdapter(Context cnt) {
+    public PreferencesTable(Context cnt) {
         context = cnt;
     }
 
-    public Uri insertAllEntry() {
+    public Uri insertAllEntry() throws Exception {
         ContentValues newTaskValues = new ContentValues();
         Date date = new Date();
         newTaskValues.put(KEY_DATE_CREATE, new SimpleDateFormat("dd.MM.yyyy").format(date));
         newTaskValues.put(KEY_TIME_CREATE, new SimpleDateFormat("HH:mm:ss").format(date));
-        newTaskValues.put(KEY_NUMBER_BT, ScaleModule.getAddress());
+        newTaskValues.put(KEY_NUMBER_BT, ScaleModule.getAddressBluetoothDevice());
         newTaskValues.put(KEY_COEFFICIENT_A, ScaleModule.getCoefficientA());
         newTaskValues.put(KEY_COEFFICIENT_B, ScaleModule.getCoefficientB());
         newTaskValues.put(KEY_MAX_WEIGHT, ScaleModule.getWeightMax());
@@ -83,7 +83,8 @@ public class PreferencesDBAdapter {
         Uri uri = ContentUris.withAppendedId(CONTENT_URI, _rowIndex);
         try {
             context.getContentResolver().delete(uri, null, null);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     public Cursor getEntryItem(int _rowIndex) {
@@ -92,7 +93,9 @@ public class PreferencesDBAdapter {
             Cursor result = context.getContentResolver().query(uri, null, null, null, null);
             result.moveToFirst();
             return result;
-        }catch (Exception e){return null;}
+        } catch (Exception e) {
+            return null;
+        }
 
     }
 

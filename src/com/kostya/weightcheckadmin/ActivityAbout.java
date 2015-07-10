@@ -27,17 +27,22 @@ public class ActivityAbout extends Activity {
         TextView textSettings = (TextView) findViewById(R.id.textSettings);
         textSettings.append(getString(R.string.Version_scale) + ScaleModule.getNumVersion() + '\n');
         try {
-            textSettings.append(getString(R.string.Name_module_bluetooth) + ScaleModule.getName() + '\n');
+            textSettings.append(getString(R.string.Name_module_bluetooth) + ScaleModule.getNameBluetoothDevice() + '\n');
         } catch (Exception e) {
             textSettings.append(getString(R.string.Name_module_bluetooth) + '\n');
         }
-        textSettings.append(getString(R.string.Address_bluetooth) + ScaleModule.getAddress() + '\n');
+        try {
+            textSettings.append(getString(R.string.Address_bluetooth) + ScaleModule.getAddressBluetoothDevice() + '\n');
+        } catch (Exception e) {
+            textSettings.append(getString(R.string.Address_bluetooth) + '\n');
+        }
+
         textSettings.append("\n");
         textSettings.append(getString(R.string.Operator) + Main.networkOperatorName + '\n');
         textSettings.append(getString(R.string.Number_phone) + Main.telephoneNumber + '\n');
         textSettings.append("\n");
         textSettings.append(getString(R.string.Battery) + ScaleModule.getBattery() + " %" + '\n');
-        if (ScaleModule.getVersion() != null) {
+        if (ScaleModule.isAttach()) {
             textSettings.append(getString(R.string.Temperature) + ScaleModule.getModuleTemperature() + '°' + 'C' + '\n');
         }
         textSettings.append(getString(R.string.Coefficient) + ScaleModule.getCoefficientA() + '\n');

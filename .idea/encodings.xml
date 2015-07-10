@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/assets/bootfiles/bt_mb_c04_36_2_v4.hex" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/libs/google-api-client-1.20.0.jar" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/libs/google-api-client-android-1.20.0.jar" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/libs/google-http-client-1.20.0.jar" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/libs/google-http-client-jackson-1.20.0.jar" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/libs/google-http-client-jackson2-1.20.0.jar" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/libs/google-oauth-client-1.20.0.jar" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/libs/jackson-core-2.5.3.jar" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/res/values/themes.xml" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>

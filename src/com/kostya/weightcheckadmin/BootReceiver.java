@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import com.kostya.weightcheckadmin.service.ServiceSmsCommand;
 
-/*
- * Created by Kostya on 16.05.14.
+/**
+ * @author Kostya
  */
 public class BootReceiver extends BroadcastReceiver {
     @Override

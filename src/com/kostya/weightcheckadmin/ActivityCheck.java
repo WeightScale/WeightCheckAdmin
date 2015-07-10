@@ -2,16 +2,13 @@ package com.kostya.weightcheckadmin;
 
 
 import android.app.ProgressDialog;
-import android.content.ContentQueryMap;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.*;
-import android.provider.BaseColumns;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -21,19 +18,21 @@ import android.view.*;
 import android.widget.*;
 import com.konst.module.ScaleModule;
 import com.konst.module.ScaleModule.HandlerWeight;
-import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
+import com.kostya.weightcheckadmin.provider.CheckTable;
 
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class ActivityCheck extends FragmentActivity implements View.OnClickListener/*, View.OnLongClickListener, InputFragment.onSomeEventListener*/ {
+public class ActivityCheck extends FragmentActivity implements View.OnClickListener {
 
     protected interface OnCheckEventListener {
         void someEvent();
     }
 
+    /**
+     * Обработка обнуления весов.
+     */
     private class ZeroThread extends Thread {
         private final ProgressDialog dialog;
 
@@ -59,13 +58,31 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Обработка авто сохранения веса.
+     */
     private class AutoWeightThread extends Thread {
         private boolean start;
         private boolean cancelled;
 
+        /**
+         * Остановка взвешивания
+         */
         final int ACTION_STOP_WEIGHTING = 1;
+
+        /**
+         * Пуск взвешивания
+         */
         final int ACTION_START_WEIGHTING = 2;
+
+        /**
+         * Сохранить результат взвешивания
+         */
         final int ACTION_STORE_WEIGHTING = 3;
+
+        /**
+         * Обновить данные веса.
+         */
         final int ACTION_UPDATE_PROGRESS = 4;
 
         @Override
@@ -77,19 +94,28 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
 
         @Override
         public void run() {
-            try {Thread.sleep(50); } catch (InterruptedException ignored) { }
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ignored) {
+            }
             while (!cancelled) {
 
                 weightViewIsSwipe = false;
                 numStable = 0;
 
                 while (!cancelled && !isCapture() && !weightViewIsSwipe) {                                              //ждём начала нагружения
-                    try {Thread.sleep(50); } catch (InterruptedException ignored) { }
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ignored) {
+                    }
                 }
                 handler.sendMessage(handler.obtainMessage(ACTION_START_WEIGHTING));
                 isStable = false;
                 while (!cancelled && !(isStable || weightViewIsSwipe)) {                                                //ждем стабилизации веса или нажатием выбора веса
-                    try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ignored) {
+                    }
                     if (!touchWeightView) {                                                                              //если не прикасаемся к индикатору тогда стабилизируем вес
                         isStable = processStable(getWeightToStepMeasuring(moduleWeight));
                         handler.sendMessage(handler.obtainMessage(ACTION_UPDATE_PROGRESS, numStable, 0));
@@ -106,7 +132,10 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
                 weightViewIsSwipe = false;
 
                 while (!cancelled && getWeightToStepMeasuring(moduleWeight) >= Main.default_min_auto_capture) {
-                    try { Thread.sleep(50); } catch (InterruptedException ignored) {}                                   // ждем разгрузки весов
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ignored) {
+                    }                                   // ждем разгрузки весов
                 }
                 vibrator.vibrate(100);
                 handler.sendMessage(handler.obtainMessage(ACTION_UPDATE_PROGRESS, 0, 0));
@@ -116,7 +145,10 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
                     }
                     break;
                 }
-                try { TimeUnit.SECONDS.sleep(2);  } catch (InterruptedException ignored) { }                            //задержка
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException ignored) {
+                }                            //задержка
 
                 if (weightType == WeightType.SECOND) {
                     cancelled = true;
@@ -127,7 +159,13 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
             start = false;
         }
 
+        /**
+         * Обработчик сообщений.
+         */
         final Handler handler = new Handler() {
+            /** Сообщение от обработчика авто сохранения.
+             * @param msg Данные сообщения.
+             */
             @Override
             public void handleMessage(Message msg) {
 
@@ -165,7 +203,7 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
     }
 
     private final AutoWeightThread autoWeightThread = new AutoWeightThread();
-    CheckDBAdapter checkTable;
+    private CheckTable checkTable;
     private Vibrator vibrator; //вибратор
     private ProgressBar progressBarWeight;
     private WeightTextView weightTextView;
@@ -175,15 +213,30 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
     private SimpleGestureFilter detectorWeightView;
     private Drawable dProgressWeight, dWeightDanger;
 
+    /**
+     * Энумератор типа веса.
+     */
     protected enum WeightType {
+        /**
+         * Первое взвешивание
+         */
         FIRST,
+        /**
+         * Второе взвешивание
+         */
         SECOND,
+        /**
+         * Вес нетто
+         */
         NETTO
     }
 
     public WeightType weightType;
 
-    public static final int COUNT_STABLE = 64;                                                                          //колличество раз стабильно был вес
+    /**
+     * Количество стабильных показаний веса для авто сохранения
+     */
+    public static final int COUNT_STABLE = 64;
 
     ContentValues values = new ContentValues();
     public int entryID;
@@ -203,7 +256,7 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         setContentView(R.layout.check);
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        checkTable = new CheckDBAdapter(this);
+        checkTable = new CheckTable(this);
 
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.screenBrightness = 1.0f;
@@ -212,11 +265,11 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         entryID = Integer.valueOf(getIntent().getStringExtra("id"));
         try {
             values = checkTable.getValuesItem(entryID);
-        }catch (Exception e){
+        } catch (Exception e) {
             exit();
         }
 
-        setTitle(getString(R.string.input_check) + " № " + entryID + ' ' + ": " + values.getAsString(CheckDBAdapter.KEY_VENDOR)); //установить заголовок
+        setTitle(getString(R.string.input_check) + " № " + entryID + ' ' + ": " + values.getAsString(CheckTable.KEY_VENDOR)); //установить заголовок
         setupTabHost(savedInstanceState);
         setupWeightView();
 
@@ -229,36 +282,14 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
 
         findViewById(R.id.imageViewPage).setOnClickListener(this);
 
-        if (values.getAsInteger(CheckDBAdapter.KEY_WEIGHT_FIRST) > 0) {
-            weightType = values.getAsInteger(CheckDBAdapter.KEY_WEIGHT_SECOND) == 0 ? WeightType.SECOND : WeightType.NETTO;
+        if (values.getAsInteger(CheckTable.KEY_WEIGHT_FIRST) > 0) {
+            weightType = values.getAsInteger(CheckTable.KEY_WEIGHT_SECOND) == 0 ? WeightType.SECOND : WeightType.NETTO;
         } else {
             weightType = WeightType.FIRST;
         }
 
-        if (values.getAsInteger(CheckDBAdapter.KEY_WEIGHT_FIRST) == 0 || values.getAsInteger(CheckDBAdapter.KEY_WEIGHT_SECOND) == 0) {
-            handlerWeight.process(true);
-        }
-    }
-
-    private void setupTabHost(Bundle savedInstanceState) {
-        mTabHost = (TabHost) findViewById(android.R.id.tabhost);
-        mTabHost.setup();
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);
-        mTabsAdapter.addTab(mTabHost.newTabSpec("input").setIndicator(createTabView(this, "приход")), InputFragment.class);
-        mTabsAdapter.addTab(mTabHost.newTabSpec("output").setIndicator(createTabView(this, "расход")), OutputFragment.class);
-        switch (values.getAsInteger(CheckDBAdapter.KEY_DIRECT)) {
-            case CheckDBAdapter.DIRECT_DOWN:
-                mTabHost.setCurrentTab(0);
-                break;
-            case CheckDBAdapter.DIRECT_UP:
-                mTabHost.setCurrentTab(1);
-                break;
-            default:
-        }
-
-        if (savedInstanceState != null) {
-            mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
+        if (values.getAsInteger(CheckTable.KEY_WEIGHT_FIRST) == 0 || values.getAsInteger(CheckTable.KEY_WEIGHT_SECOND) == 0) {
+            handlerWeight.start();
         }
     }
 
@@ -291,25 +322,58 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         }
     }
 
-    protected void exit() {
-        handlerWeight.process(false);
-        autoWeightThread.cancel();
-        while (autoWeightThread.isStart()) ;
-        if (weightType == WeightType.NETTO) {
-            values.put(CheckDBAdapter.KEY_IS_READY, 1);
-            checkTable.setCheckReady(entryID);
-            startActivity(new Intent(getBaseContext(), ActivityViewCheck.class).putExtra("id", entryID));
-        }
-        checkTable.updateEntry(entryID, values);
-        finish();
-    }
-
     @Override
     public void onBackPressed() {
         if (flagExit) {
             super.onBackPressed();
             exit();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handlerWeight.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handlerWeight.stop(false);
+    }
+
+    private void setupTabHost(Bundle savedInstanceState) {
+        mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+        mTabHost.setup();
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+        mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);
+        mTabsAdapter.addTab(mTabHost.newTabSpec("input").setIndicator(createTabView(this, getString(R.string.incoming))), InputFragment.class);
+        mTabsAdapter.addTab(mTabHost.newTabSpec("output").setIndicator(createTabView(this, getString(R.string.outgo))), OutputFragment.class);
+        switch (values.getAsInteger(CheckTable.KEY_DIRECT)) {
+            case CheckTable.DIRECT_DOWN:
+                mTabHost.setCurrentTab(0);
+                break;
+            case CheckTable.DIRECT_UP:
+                mTabHost.setCurrentTab(1);
+                break;
+            default:
+        }
+
+        if (savedInstanceState != null) {
+            mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
+        }
+    }
+
+    protected void exit() {
+        autoWeightThread.cancel();
+        while (autoWeightThread.isStart()) ;
+        if (weightType == WeightType.NETTO) {
+            values.put(CheckTable.KEY_IS_READY, 1);
+            checkTable.setCheckReady(entryID);
+            startActivity(new Intent(getBaseContext(), ActivityViewCheck.class).putExtra("id", entryID));
+        }
+        checkTable.updateEntry(entryID, values);
+        finish();
     }
 
     private static View createTabView(final Context context, final CharSequence text) {
@@ -319,6 +383,12 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         return view;
     }
 
+    /**
+     * Захват веса для авто сохранения веса.
+     * Задержка захвата от ложных срабатываний. Устанавливается значения в настройках.
+     *
+     * @return true - Условия захвата истины.
+     */
     public boolean isCapture() {
         boolean capture = false;
         while (getWeightToStepMeasuring(moduleWeight) > Main.autoCapture) {
@@ -347,10 +417,20 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         return false;
     }
 
+    /**
+     * Преобразовать вес в шкалу шага веса.
+     * Шаг измерения установливается в настройках.
+     *
+     * @param weight Вес для преобразования.
+     * @return Преобразованый вес.
+     */
     private int getWeightToStepMeasuring(int weight) {
         return weight / Main.stepMeasuring * Main.stepMeasuring;
     }
 
+    /**
+     * Устоновка индикатора веса.
+     */
     private void setupWeightView() {
 
         weightTextView = new WeightTextView(this);
@@ -421,20 +501,20 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         switch (weightType) {
             case FIRST:
                 if (weight > 0) {
-                    values.put(CheckDBAdapter.KEY_WEIGHT_FIRST, weight);
+                    values.put(CheckTable.KEY_WEIGHT_FIRST, weight);
                     vibrator.vibrate(100); //вибрация
                     flag = true;
                 }
                 break;
             case SECOND:
-                values.put(CheckDBAdapter.KEY_WEIGHT_SECOND, weight);
+                values.put(CheckTable.KEY_WEIGHT_SECOND, weight);
                 int total = sumNetto();
-                values.put(CheckDBAdapter.KEY_PRICE_SUM, total);
+                values.put(CheckTable.KEY_PRICE_SUM, total);
                 vibrator.vibrate(100); //вибрация
                 flag = true;
                 break;
             case NETTO:
-                handlerWeight.process(false);
+                handlerWeight.stop(false);
                 exit();
                 break;
         }
@@ -447,14 +527,25 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         return flag;
     }
 
+    /**
+     * Расчет веса нетто.
+     *
+     * @return Вес нетто.
+     */
     public int sumNetto() {
-        int netto = values.getAsInteger(CheckDBAdapter.KEY_WEIGHT_FIRST) - values.getAsInteger(CheckDBAdapter.KEY_WEIGHT_SECOND);
-        values.put(CheckDBAdapter.KEY_WEIGHT_NETTO, netto);
+        int netto = values.getAsInteger(CheckTable.KEY_WEIGHT_FIRST) - values.getAsInteger(CheckTable.KEY_WEIGHT_SECOND);
+        values.put(CheckTable.KEY_WEIGHT_NETTO, netto);
         return netto;
     }
 
+    /**
+     * Засчет стоимости
+     *
+     * @param netto Вес нетто.
+     * @return Сумма.
+     */
     public float sumTotal(int netto) {
-        return (float) netto * values.getAsInteger(CheckDBAdapter.KEY_PRICE) / 1000;
+        return (float) netto * values.getAsInteger(CheckTable.KEY_PRICE) / 1000;
     }
 
     private void weightTypeUpdate() {
@@ -567,9 +658,9 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         public void onPageSelected(final int position) {
 
             if (position == 0) {
-                values.put(CheckDBAdapter.KEY_DIRECT, CheckDBAdapter.DIRECT_DOWN);
+                values.put(CheckTable.KEY_DIRECT, CheckTable.DIRECT_DOWN);
             } else if (position == 1) {
-                values.put(CheckDBAdapter.KEY_DIRECT, CheckDBAdapter.DIRECT_UP);
+                values.put(CheckTable.KEY_DIRECT, CheckTable.DIRECT_UP);
             }
             TabWidget widget = mTabHost.getTabWidget();
             int oldFocusability = widget.getDescendantFocusability();
@@ -579,9 +670,12 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
         }
 
         @Override
-        public void onPageScrollStateChanged(final int state) {}
+        public void onPageScrollStateChanged(final int state) {
+        }
 
-        public Fragment getCurrentFragment() { return mCurrentFragment; }
+        public Fragment getCurrentFragment() {
+            return mCurrentFragment;
+        }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
@@ -593,11 +687,21 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
 
     }
 
-    HandlerWeight handlerWeight = new HandlerWeight() {
+    /** Обработчик показаний веса
+     * Возвращяем время обновления показаний веса в милисекундах.
+     */
+    final HandlerWeight handlerWeight = new HandlerWeight() {
+        /** Сообщение показаний веса.
+         * @param what Результат статуса сообщения энумератор ResultWeight.
+         * @param weight Данные веса в килограмах.
+         * @param sensor Данные показания сенсорного датчика.
+         * @return Время обновления показаний в милисекундах.
+         */
         @Override
-        public int handlerWeight(final ScaleModule.ResultWeight what, final int weight, final int sensor) {
+        public int onEvent(final ScaleModule.ResultWeight what, final int weight, final int sensor) {
             runOnUiThread(new Runnable() {
                 Rect bounds;
+
                 @Override
                 public void run() {
                     switch (what) {
@@ -630,8 +734,8 @@ public class ActivityCheck extends FragmentActivity implements View.OnClickListe
                             weightTextView.updateProgress(getString(R.string.NO_CONNECT), Color.BLACK, getResources().getDimension(R.dimen.text_large_xx));
                             progressBarWeight.setProgress(0);
                             break;
+                        default:
                     }
-
                 }
             });
             return 20; // Обновляем через милисикунды

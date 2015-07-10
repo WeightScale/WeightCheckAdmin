@@ -8,8 +8,10 @@ import android.content.*;
 import android.os.*;
 import android.view.*;
 import android.widget.*;
-import com.konst.module.InterfaceScaleModule;
+import com.konst.module.Module;
+import com.konst.module.OnEventConnectResult;
 import com.konst.module.ScaleModule;
+import com.kostya.weightcheckadmin.bootloader.ActivityBootloader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,12 +19,13 @@ import java.util.ArrayList;
 public class ActivitySearch extends Activity implements View.OnClickListener {
 
     private BroadcastReceiver broadcastReceiver; //приёмник намерений
-    private BluetoothAdapter bluetooth; //блютуз адаптер
+    //private BluetoothAdapter bluetooth; //блютуз адаптер
     private ArrayList<BluetoothDevice> foundDevice; //чужие устройства
     private ArrayAdapter<BluetoothDevice> bluetoothAdapter; //адаптер имён
     private IntentFilter intentFilter; //фильтр намерений
     private ListView listView; //список весов
     private TextView textViewLog; //лог событий
+    private ScaleModule scaleModule;
 
     //private LinearLayout linearScreen;//лайаут для экрана показывать когда загрузились настройки
 
@@ -36,10 +39,16 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-            if (bluetooth.isDiscovering()) {
-                bluetooth.cancelDiscovery();
+            if (scaleModule.getAdapter().isDiscovering()) {
+                scaleModule.getAdapter().cancelDiscovery();
             }
-            scaleModule.init(Main.versionName, (BluetoothDevice) foundDevice.toArray()[i]);
+            try {
+                scaleModule.init((BluetoothDevice) foundDevice.toArray()[i]);
+                scaleModule.attach();
+            } catch (Exception e) {
+                foundDevice.remove(i);
+                bluetoothAdapter.notifyDataSetChanged();
+            }
         }
     };
 
@@ -58,7 +67,13 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
 
         //Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         textViewLog = (TextView) findViewById(R.id.textLog);
-        bluetooth = BluetoothAdapter.getDefaultAdapter();
+
+        try {
+            scaleModule = new ScaleModule(Main.packageInfo.versionName, onEventConnectResult);
+        } catch (Exception e) {
+            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            finish();
+        }
 
         broadcastReceiver = new BroadcastReceiver() {
 
@@ -95,7 +110,7 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                         case BluetoothDevice.ACTION_ACL_CONNECTED:
                             setProgressBarIndeterminateVisibility(false);
                             try {
-                                setTitle(" \"" + ScaleModule.getName() + "\", v." + ScaleModule.getNumVersion()); //установить заголовок
+                                setTitle(" \"" + ScaleModule.getNameBluetoothDevice() + "\", v." + ScaleModule.getNumVersion()); //установить заголовок
                             } catch (Exception e) {
                                 setTitle(" \"" + e.getMessage() + "\", v." + ScaleModule.getNumVersion()); //установить заголовок      }
                             }
@@ -103,6 +118,7 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                         case BluetoothDevice.ACTION_ACL_DISCONNECTED:
                             setTitle(getString(R.string.Search_scale)); //установить заголовок
                             break;
+                        default:
                     }
                 }
             }
@@ -115,20 +131,10 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         registerReceiver(broadcastReceiver, intentFilter);
 
-        if (bluetooth != null) {
-            if (!bluetooth.isEnabled()) {
-                log(R.string.bluetooth_off, true);
-                bluetooth.enable();
-            } else {
-                log(R.string.bluetooth_on, true);
-            }
-        }
-
         foundDevice = new ArrayList<>();
 
-
         for (int i = 0; Preferences.contains(ActivityPreferences.KEY_ADDRESS + i); i++) { //заполнение списка
-            foundDevice.add(bluetooth.getRemoteDevice(Preferences.read(ActivityPreferences.KEY_ADDRESS + i, "")));
+            foundDevice.add(scaleModule.getAdapter().getRemoteDevice(Preferences.read(ActivityPreferences.KEY_ADDRESS + i, "")));
         }
         bluetoothAdapter = new BluetoothListAdapter(this, foundDevice);
 
@@ -140,7 +146,7 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
         listView.setOnItemClickListener(onItemClickListener);
 
         if (foundDevice.isEmpty()) {
-            bluetooth.startDiscovery();
+            scaleModule.getAdapter().startDiscovery();
         }
         /*String msg = "0503285426 coffa=0.25687 coffb gogusr=kreogen.lg@gmail.com gogpsw=htcehc25";
         String str = encodeMessage(msg);
@@ -154,8 +160,8 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
 
     //==================================================================================================================
     private void exit() {
-        if (bluetooth.isDiscovering()) {
-            bluetooth.cancelDiscovery();
+        if (scaleModule.getAdapter().isDiscovering()) {
+            scaleModule.getAdapter().cancelDiscovery();
         }
         unregisterReceiver(broadcastReceiver);
 
@@ -199,12 +205,13 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                 registerReceiver(broadcastReceiver, new IntentFilter());
                 unregisterReceiver(broadcastReceiver);
                 registerReceiver(broadcastReceiver, intentFilter);
-                bluetooth.startDiscovery();
+                scaleModule.getAdapter().startDiscovery();
                 break;
             case R.id.exit:
                 //onDestroy();
                 finish();
                 break;
+            default:
         }
         return true;
     }
@@ -245,18 +252,18 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                 registerReceiver(broadcastReceiver, new IntentFilter());
                 unregisterReceiver(broadcastReceiver);
                 registerReceiver(broadcastReceiver, intentFilter);
-                bluetooth.startDiscovery();
+                scaleModule.getAdapter().startDiscovery();
                 break;
+            default:
         }
     }
 
-
-    public final ScaleModule scaleModule = new ScaleModule() {
+    OnEventConnectResult onEventConnectResult = new OnEventConnectResult() {
         AlertDialog.Builder dialog;
         private ProgressDialog dialogSearch;
 
         @Override
-        public void handleResultConnect(final ResultConnect result) {
+        public void handleResultConnect(final Module.ResultConnect result) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -266,32 +273,8 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                             finish();
                             break;
                         case STATUS_SCALE_UNKNOWN:
-                            String device = ScaleModule.getName();
-                            log(device + ' ' + getString(R.string.not_scale));
+                            log(ScaleModule.getNameBluetoothDevice() + ' ' + getString(R.string.not_scale));
                             break;
-                        /*case STATUS_SETTINGS_UNCORRECTED:
-                            dialog = new AlertDialog.Builder(ActivitySearch.this);
-                            dialog.setTitle("Ошибка в настройках");
-                            dialog.setCancelable(false);
-                            dialog.setNegativeButton("Закрыть", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                    onBackPressed();
-                                }
-                            });
-                            dialog.setMessage("Запросите настройки у администратора. Настройки должен выполнять опытный пользователь");
-                            Toast.makeText(getBaseContext(), R.string.preferences_error, Toast.LENGTH_SHORT).show();
-                            setTitle(getString(R.string.app_name) + ": админ настройки неправельные");
-                            dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    startActivity(new Intent(ActivitySearch.this, ActivityTuning.class));
-                                    dialogInterface.dismiss();
-                                }
-                            });
-                            dialog.show();
-                            break;*/
                         case STATUS_ATTACH_START:
                             listView.setEnabled(false);
                             dialogSearch = new ProgressDialog(ActivitySearch.this);
@@ -300,10 +283,10 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                             dialogSearch.show();
                             dialogSearch.setContentView(R.layout.custom_progress_dialog);
                             TextView tv1 = (TextView) dialogSearch.findViewById(R.id.textView1);
-                            tv1.setText(getString(R.string.Connecting) + '\n' + ScaleModule.getName());
+                            tv1.setText(getString(R.string.Connecting) + '\n' + ScaleModule.getNameBluetoothDevice());
 
                             setProgressBarIndeterminateVisibility(true);
-                            setTitle(getString(R.string.Connecting) + getString(R.string.app_name) + ' ' + ScaleModule.getName()); //установить заголовок
+                            setTitle(getString(R.string.Connecting) + getString(R.string.app_name) + ' ' + ScaleModule.getNameBluetoothDevice()); //установить заголовок
                             break;
                         case STATUS_ATTACH_FINISH:
                             listView.setEnabled(true);
@@ -319,7 +302,7 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
         }
 
         @Override
-        public void handleConnectError(final Error error, final String s) {
+        public void handleConnectError(final Module.ResultError error, final String s) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -360,7 +343,7 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                                     onBackPressed();
                                 }
                             });
-                            dialog.setMessage("Запросите настройки у администратора. Настройки должен выполнять опытный пользователь. Ошибка("+s+")");
+                            dialog.setMessage("Запросите настройки у администратора. Настройки должен выполнять опытный пользователь. Ошибка(" + s + ')');
                             Toast.makeText(getBaseContext(), R.string.preferences_error, Toast.LENGTH_SHORT).show();
                             setTitle(getString(R.string.app_name) + ": админ настройки неправельные");
                             dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -374,7 +357,7 @@ public class ActivitySearch extends Activity implements View.OnClickListener {
                             break;
                         case CONNECT_ERROR:
                             //setTitle(getString(R.string.app_name) + getString(R.string.error_connect)); //установить заголовок
-                            log(getString(R.string.error_connect));
+                            log(getString(R.string.Error_connect) + s);
                             break;
                         default:
                     }

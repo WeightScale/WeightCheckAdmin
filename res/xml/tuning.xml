@@ -8,17 +8,17 @@
                             android:summary="Установите нулевой вес на весах, и нажминте на поле" android:key="point1"/>
                 <EditTextPreference android:title="Контрольный вес"
                                     android:summary=" Установите калиброваный вес на весах, и введите вес в поле"
-                            android:key="point2" android:inputType="number"/>
+                                    android:key="point2" android:inputType="number"/>
                 <EditTextPreference android:title="Максимальный вес"
                                     android:summary="Введите в поле максимальный вес который взвешивают весы"
-                            android:key="weightMax" android:inputType="number"/>
+                                    android:key="weightMax" android:inputType="number"/>
                 <EditTextPreference android:title="Установить температуру"
                                     android:summary="Введите в поле текущую температуру" android:key="call_temp"
-                            android:inputType="number"/>
+                                    android:inputType="number"/>
                 <EditTextPreference android:title="Батарея"
                                     android:summary="Введите в поле текущий заряд батареи в процентах"
                                     android:key="call_battery" android:inputType="number"/>
-    </PreferenceCategory>
+            </PreferenceCategory>
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="Ввод калибровочных данных">
@@ -38,12 +38,13 @@
         <PreferenceScreen android:title="Настройки для облака"
                           android:summary="Настройки для отправки данных через интернет">
             <PreferenceCategory android:title="Настройки для облака">
-        <EditTextPreference android:title="Таблица" android:summary="Имя таблици spreadsheet в Google drive "
-                            android:key="sheet" android:inputType="text"/>
-        <EditTextPreference android:title="Пользователь" android:summary="Account Google" android:key="name"
-                            android:inputType="textEmailAddress"/>
-        <EditTextPreference android:title="Пароль" android:summary="Password account Google" android:key="password"
-                            android:inputType="textPassword"/>
+                <EditTextPreference android:title="Таблица" android:summary="Имя таблици spreadsheet в Google drive "
+                                    android:key="sheet" android:inputType="text"/>
+                <EditTextPreference android:title="Пользователь" android:summary="Account Google" android:key="name"
+                                    android:inputType="textEmailAddress"/>
+                <EditTextPreference android:title="Пароль" android:summary="Password account Google"
+                                    android:key="password"
+                                    android:inputType="textPassword"/>
             </PreferenceCategory>
         </PreferenceScreen>
     </PreferenceCategory>

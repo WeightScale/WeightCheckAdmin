@@ -1,24 +1,31 @@
 package com.kostya.weightcheckadmin;
 
 import android.app.Application;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import com.konst.module.ScaleModule;
 import com.kostya.weightcheckadmin.service.ServiceSmsCommand;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Kostya
- * Date: 30.10.13
- * Time: 15:04
- * To change this template use File | Settings | File Templates.
+ * @author Kostya
  */
 public class Main extends Application {
-    static Service cloud;
+    /**
+     * Настройки для весов.
+     */
     public static Preferences preferencesScale;
+    /**
+     * Настройки для обновления весов.
+     */
     public static Preferences preferencesUpdate;
 
+    static PackageInfo packageInfo;
+
+    /**
+     * Версия пограммы весового модуля.
+     */
     public static final int microSoftware = 4;
     protected static String networkOperatorName;
     protected static String simNumber;
@@ -27,29 +34,99 @@ public class Main extends Application {
     protected static int versionNumber;
     public static String versionName = "";
 
-    public static int stepMeasuring;                                // шаг измерения (округление)
-    public static int autoCapture;                                  //шаг захвата (округление)
-    public static int timeDelayDetectCapture;                       //Время задержки для авто захвата после которого начинается захват в секундах
+    /**
+     * Шаг измерения (округление).
+     */
+    public static int stepMeasuring;
+
+    /**
+     * Шаг захвата (округление).
+     */
+    public static int autoCapture;
+
+    /**
+     * Время задержки для авто захвата после которого начинается захват в секундах.
+     */
+    public static int timeDelayDetectCapture;
     public static int day_closed;
     public static int day_delete;
 
-    public static final int default_max_weight = 1000; //вес максимальный по умолчанию килограммы
-    public static final int default_max_battery = 100;  //максимальный заряд батареи проценты
-    public static final int default_max_time_off = 60;   //максимальное время бездействия весов в минутах
-    protected static final int default_min_time_off = 10;   //минимальное время бездействия весов в минутах
-    protected static final int default_max_time_auto_null = 120;  //максимальное время срабатывания авто ноль секундах
-    protected static final int default_limit_auto_null = 50;   //предел ошибки при котором срабатывает авто ноль килограммы
-    protected static final int default_max_step_scale = 20;   //максимальный шаг измерения весов килограммы
-    protected static final int default_max_auto_capture = 100;  //максимальный значение авто захвата веса килограммы
-    protected static final int default_delta_auto_capture = 10;   //дельта значение авто захвата веса килограммы
-    protected static final int default_min_auto_capture = 20;   //минимальное значение авто захвата веса килограммы
-    protected static final int default_day_close_check = 10;   //максимальное количество дней для закрытия не закрытых чеков дней
-    protected static final int default_day_delete_check = 10;   //максимальное количество дней для удвления чеков дней
-    public static final int default_adc_filter = 15;   //максимальное значение фильтра ацп
+    /**
+     * Вес максимальный по умолчанию килограммы.
+     */
+    public static final int default_max_weight = 1000;
+
+    /**
+     * Максимальный заряд батареи проценты.
+     */
+    public static final int default_max_battery = 100;
+
+    /**
+     * Максимальное время бездействия весов в минутах.
+     */
+    public static final int default_max_time_off = 60;
+
+    /**
+     * Минимальное время бездействия весов в минутах.
+     */
+    protected static final int default_min_time_off = 10;
+
+    /**
+     * Максимальное время срабатывания авто ноль секундах.
+     */
+    protected static final int default_max_time_auto_null = 120;
+
+    /**
+     * Предел ошибки при котором срабатывает авто ноль килограммы.
+     */
+    protected static final int default_limit_auto_null = 50;
+
+    /**
+     * Максимальный шаг измерения весов килограммы.
+     */
+    protected static final int default_max_step_scale = 20;
+
+    /**
+     * Максимальный значение авто захвата веса килограммы.
+     */
+    protected static final int default_max_auto_capture = 100;
+
+    /**
+     * Дельта значение авто захвата веса килограммы.
+     */
+    protected static final int default_delta_auto_capture = 10;
+
+    /**
+     * Минимальное значение авто захвата веса килограммы.
+     */
+    protected static final int default_min_auto_capture = 20;
+
+    /**
+     * Максимальное количество дней для закрытия не закрытых чеков дней.
+     */
+    protected static final int default_day_close_check = 10;
+
+    /**
+     * Максимальное количество дней для удвления чеков дней.
+     */
+    protected static final int default_day_delete_check = 10;
+
+    /**
+     * Максимальное значение фильтра ацп.
+     */
+    public static final int default_adc_filter = 15;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        try {
+            PackageManager packageManager = getPackageManager();
+            packageInfo = packageManager.getPackageInfo(getPackageName(), 0);
+            //Main.versionNumber = packageInfo.versionCode;
+            //Main.versionName = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {  }
+
         preferencesScale = new Preferences(getApplicationContext(), Preferences.PREFERENCES);
         preferencesUpdate = new Preferences(getApplicationContext(), Preferences.PREF_UPDATE);
         Preferences.load(getSharedPreferences(Preferences.PREFERENCES, Context.MODE_PRIVATE)); //загрузить настройки
@@ -62,8 +139,12 @@ public class Main extends Application {
         ScaleModule.setWeightError(Preferences.read(ActivityPreferences.KEY_MAX_NULL, default_limit_auto_null));
         timeDelayDetectCapture = Preferences.read(ActivityPreferences.KEY_TIME_DELAY_DETECT_CAPTURE, 1);
 
-        getApplicationContext().startService(new Intent(getApplicationContext(), ServiceSmsCommand.class));// Запускаем сервис для приемеа смс команд
+        /** Запускаем сервис для приемеа смс команд. */
+        getApplicationContext().startService(new Intent(getApplicationContext(), ServiceSmsCommand.class));
     }
 
-
+    @Override
+    public void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+    }
 }

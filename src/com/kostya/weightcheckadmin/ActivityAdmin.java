@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import com.kostya.weightcheckadmin.bootloader.ActivityBootloader;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,7 +37,8 @@ public class ActivityAdmin extends Activity implements OnClickListener {
             public void onClick(DialogInterface dialogInterface, int i) {
                 switch (i) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        startActivity(new Intent(getBaseContext(), ActivitySearch.class).putExtra("bootloader", true));
+                        //startActivity(new Intent(getBaseContext(), ActivitySearch.class).setAction("bootloader"));
+                        startActivity(new Intent().setClass(getApplicationContext(), ActivityBootloader.class));
                         finish();
                         break;
                     default:
@@ -60,7 +62,7 @@ public class ActivityAdmin extends Activity implements OnClickListener {
                 break;
             case R.id.buttonScales:
                 Preferences.admin = true;
-                startActivity(new Intent(getBaseContext(), ActivityScales.class).putExtra("bootloader", false));
+                startActivity(new Intent(getBaseContext(), ActivityScales.class).setAction("bootloader"));
                 finish();
                 break;
             case R.id.buttonBack:

@@ -15,13 +15,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.*;
-import com.kostya.weightcheckadmin.provider.TaskDBAdapter;
+import com.kostya.weightcheckadmin.provider.TaskTable;
 
 /*
  * Created by Kostya on 09.01.2015.
  */
 public class TaskMessageDialog {
-    final TaskDBAdapter taskTable;
+    final TaskTable taskTable;
     protected final Context mContext;
     protected final int mContactId;
     protected final int mCheckId;
@@ -36,7 +36,7 @@ public class TaskMessageDialog {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         contentResolver = mContext.getContentResolver();
-        taskTable = new TaskDBAdapter(context);
+        taskTable = new TaskTable(context);
     }
 
     //@TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -192,10 +192,10 @@ public class TaskMessageDialog {
                     Uri uri = ContentUris.withAppendedId(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, id);
                     Cursor result = contentResolver.query(uri, new String[]{ContactsContract.CommonDataKinds.Phone.DATA}, null, null, null);
                     if (result != null) {
-                    if (result.moveToFirst()) {
-                        String str = result.getString(result.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
+                        if (result.moveToFirst()) {
+                            String str = result.getString(result.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
                             taskTable.insertNewTask(TaskCommand.TaskType.TYPE_CHECK_SEND_SMS_CONTACT, mCheckId, mContactId, str);
-                    }
+                        }
                     }
 
                     dialog.dismiss();
@@ -300,8 +300,8 @@ public class TaskMessageDialog {
 
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-            if(view.getId() == R.id.title){
-                ((TextView)view).setCompoundDrawablesWithIntrinsicBounds(res, 0, 0, 0);
+            if (view.getId() == R.id.title) {
+                ((TextView) view).setCompoundDrawablesWithIntrinsicBounds(res, 0, 0, 0);
                 ((TextView) view).setText(cursor.getString(columnIndex));
             }
             return true;

@@ -12,19 +12,25 @@ import android.provider.BaseColumns;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import com.kostya.weightcheckadmin.*;
-import com.kostya.weightcheckadmin.provider.ErrorDBAdapter;
-import com.kostya.weightcheckadmin.provider.TaskDBAdapter;
+import com.kostya.weightcheckadmin.provider.ErrorTable;
+import com.kostya.weightcheckadmin.provider.TaskTable;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-/*
- * Created by Kostya on 04.04.2015.
+/**
+ * Сервис обработки задач.
+ * Задачи отправки данных.
+ *
+ * @author Kostya
  */
 public class ServiceProcessTask extends Service {
-
+    /**
+     * Таблица задач
+     */
+    private TaskTable taskTable;
     private Internet internet;
-    private static BroadcastReceiver broadcastReceiver;
+    private BroadcastReceiver broadcastReceiver;
     private NotificationManager notificationManager;
 
     @Override
@@ -41,6 +47,9 @@ public class ServiceProcessTask extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        /**Экземпляр таблици задач*/
+        taskTable = new TaskTable(getApplicationContext());
+        /**Экземпляр интернет класса*/
         internet = new Internet(this);
         broadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -51,6 +60,8 @@ public class ServiceProcessTask extends Service {
                         internet.connect();
                     } else if (action.equals(Internet.INTERNET_DISCONNECT)) {
                         internet.disconnect();
+                        /** Останавливаем сервис */
+                        stopSelf();
                     }
                 }
             }
@@ -58,44 +69,62 @@ public class ServiceProcessTask extends Service {
         IntentFilter filter = new IntentFilter(Internet.INTERNET_CONNECT);
         filter.addAction(Internet.INTERNET_DISCONNECT);
         registerReceiver(broadcastReceiver, filter);
-        //stackBuilder = TaskStackBuilder.create(this);
-        //stackBuilder.addParentStack(ActivityScales.class);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    void taskProcess() {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (broadcastReceiver != null)
+            unregisterReceiver(broadcastReceiver);
+    }
 
-        TaskCommand taskCommand = new TaskCommand(getApplicationContext(), msgHandler);
-
-        msgHandler.sendMessage(msgHandler.obtainMessage(0, TaskCommand.TaskType.values().length, 0));
-        for (TaskCommand.TaskType type : TaskCommand.TaskType.values()) {
-            Cursor cursor = new TaskDBAdapter(getApplicationContext()).getTypeEntry(type);
+    /**
+     * Процесс выполнения задач
+     */
+    private void taskProcess() {
+        /**Экземпляр команд задач*/
+        TaskCommand taskCommand = new TaskCommand(this, msgHandler);
+        /**Сообщение на обработчик запущен процесс задач*/
+        msgHandler.obtainMessage(TaskCommand.HANDLER_TASK_START, TaskCommand.TaskType.values().length, 0).sendToTarget();
+        for (TaskCommand.TaskType taskType : TaskCommand.TaskType.values()) {
+            Cursor cursor = taskTable.getTypeEntry(taskType);
             ContentQueryMap mQueryMap = new ContentQueryMap(cursor, BaseColumns._ID, true, null);
             Map<String, ContentValues> map = mQueryMap.getRows();
             cursor.close();
             try {
-                taskCommand.execTask(type, map);
+                taskCommand.execute(taskType, map);
             } catch (Exception e) {
                 msgHandler.sendEmptyMessage(TaskCommand.HANDLER_FINISH_THREAD);
             }
         }
     }
 
+    /**
+     * Обработчик сообщений
+     */
     public final HandlerTaskNotification msgHandler = new HandlerTaskNotification() {
 
+        /** Количество запущеных процессов */
+        int numThread;
+
+        /** Сообщение на удаление задачи
+         * @param what Тип сообщения
+         * @param arg1 Номер записи
+         */
         @Override
         public void handleRemoveEntry(int what, int arg1) {
             switch (what) {
                 case TaskCommand.HANDLER_NOTIFY_CHECK_UNSEND:
-                    new TaskDBAdapter(getApplicationContext()).removeEntryIfErrorOver(arg1);
+                    taskTable.removeEntryIfErrorOver(arg1);
                     break;
                 default:
-                    new TaskDBAdapter(getApplicationContext()).removeEntry(arg1);
+                    taskTable.removeEntry(arg1);
             }
         }
 
         @Override
-        public void handleNotificationError(int what, int arg1, TaskCommand.MsgNotify msg) {
+        public void handleNotificationError(int what, int arg1, TaskCommand.MessageNotify msg) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(ServiceProcessTask.this);
             builder.setSmallIcon(R.drawable.ic_stat_information);
             builder.setTicker("Ошибка").setContentText(msg.getMessage());
@@ -105,10 +134,8 @@ public class ServiceProcessTask extends Service {
 
         @Override
         public void handleError(int what, String msg) {
-            new ErrorDBAdapter(getApplicationContext()).insertNewEntry(String.valueOf(what), msg);
+            new ErrorTable(getApplicationContext()).insertNewEntry(String.valueOf(what), msg);
         }
-
-        int numThread;
 
         @Override
         public void handleMessage(Message msg) {
@@ -116,12 +143,13 @@ public class ServiceProcessTask extends Service {
             intent.setAction("notifyChecks");
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ServiceProcessTask.this);
             switch (msg.what) {
-                case 0:
+                case TaskCommand.HANDLER_TASK_START:
                     numThread += msg.arg1;
                     return;
                 case TaskCommand.HANDLER_FINISH_THREAD:
-                    if (--numThread <= 0)
+                    if (--numThread <= 0) {
                         sendBroadcast(new Intent(Internet.INTERNET_DISCONNECT));
+                    }
                     return;
                 case TaskCommand.HANDLER_NOTIFY_SHEET: //отправлено на диск sheet
                     mBuilder.setSmallIcon(R.drawable.ic_stat_drive)
@@ -181,4 +209,6 @@ public class ServiceProcessTask extends Service {
 
         return builder.build();
     }
+
+
 }

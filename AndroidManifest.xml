@@ -90,7 +90,7 @@
         </activity>
         <service android:enabled="true" android:name=".service.ServiceSmsCommand" android:multiprocess="true"/>
         <!--<service android:enabled="true" android:name=".ServiceGetPrefToServer" android:multiprocess ="true"/>-->
-        <service android:enabled="true" android:name=".service.ServiceProcessTask"   android:multiprocess="true">
+        <service android:enabled="true" android:name=".service.ServiceProcessTask" android:multiprocess="true">
         </service>
 
         <provider android:authorities="com.kostya.weightcheckadmin.weightCheck"

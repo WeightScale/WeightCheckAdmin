@@ -28,8 +28,9 @@
                 <EditTextPreference android:title="@string/closed_checks" android:summary="@string/sum_closed_checks"
                                     android:key="day_closed_check" android:inputType="number"/>
             </PreferenceCategory>
-        </PreferenceScreen><EditTextPreference android:title="@string/filter_adc" android:summary="@string/sum_filter_adc"
-                                               android:key="filter" android:inputType="number"/>
+        </PreferenceScreen>
+        <EditTextPreference android:title="@string/filter_adc" android:summary="@string/sum_filter_adc"
+                            android:key="filter" android:inputType="number"/>
         <Preference android:title="Для администратора" android:key="admin"/>
     </PreferenceCategory>
     <PreferenceCategory>

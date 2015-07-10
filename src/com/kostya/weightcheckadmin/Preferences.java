@@ -11,7 +11,8 @@ import java.util.Set;
 public class Preferences {
     private static SharedPreferences sharedPreferences;
     private static SharedPreferences.Editor editor;
-    static boolean admin = false; //возможности админа
+    static boolean admin;
+
     public static final String PREFERENCES = "preferences"; //настройки общии для весов
     public static final String PREF_UPDATE = "pref_update";    //настройки сохраненные при обновлении прошивки
 

@@ -12,14 +12,14 @@ import com.konst.module.ScaleModule;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ErrorDBAdapter {
+public class ErrorTable {
 
     private final Context context;
     //private SQLiteDatabase db;
 
     public static int day;
 
-    public static final String TABLE_ERROR = "errorTable";
+    public static final String TABLE = "errorTable";
 
     public static final String KEY_ID = BaseColumns._ID;
     public static final String KEY_DATE_CREATE = "dateCreate";
@@ -27,19 +27,19 @@ public class ErrorDBAdapter {
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_NUMBER_BT = "bluetooth";
 
-    private static final String[] All_COLUMN_ERROR_TABLE = {KEY_ID, KEY_DATE_CREATE, KEY_NUMBER_ERROR, KEY_DESCRIPTION, KEY_NUMBER_BT};
+    private static final String[] All_COLUMN_TABLE = {KEY_ID, KEY_DATE_CREATE, KEY_NUMBER_ERROR, KEY_DESCRIPTION, KEY_NUMBER_BT};
 
-    public static final String TABLE_CREATE_ERROR = "create table "
-            + TABLE_ERROR + " ("
+    public static final String TABLE_CREATE = "create table "
+            + TABLE + " ("
             + KEY_ID + " integer primary key autoincrement, "
             + KEY_DATE_CREATE + " text,"
             + KEY_NUMBER_ERROR + " text,"
             + KEY_DESCRIPTION + " text,"
             + KEY_NUMBER_BT + " text );";
 
-    private static final Uri CONTENT_URI = Uri.parse("content://" + WeightCheckBaseProvider.AUTHORITY + '/' + TABLE_ERROR);
+    private static final Uri CONTENT_URI = Uri.parse("content://" + WeightCheckBaseProvider.AUTHORITY + '/' + TABLE);
 
-    public ErrorDBAdapter(Context cnt) {
+    public ErrorTable(Context cnt) {
         context = cnt;
     }
 
@@ -52,7 +52,7 @@ public class ErrorDBAdapter {
         String bt_number = mngr.getDeviceId();
         newTaskValues.put(KEY_DATE_CREATE, sdf.format(date));
         if (bt_number != null) {
-            newTaskValues.put(KEY_NUMBER_BT, bt_number + ' ' + ScaleModule.getAddress());
+            newTaskValues.put(KEY_NUMBER_BT, bt_number + ' ' + ScaleModule.getAddressBluetoothDevice());
         }
         newTaskValues.put(KEY_NUMBER_ERROR, number);
         newTaskValues.put(KEY_DESCRIPTION, des);
@@ -78,7 +78,9 @@ public class ErrorDBAdapter {
             }
             cursor.close();
             return flag;
-        }catch (Exception e){ return false;}
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public int deleteAll() {
@@ -86,7 +88,7 @@ public class ErrorDBAdapter {
     }
 
     public Cursor getAllEntries() {
-        return context.getContentResolver().query(CONTENT_URI, All_COLUMN_ERROR_TABLE, null, null, null);
+        return context.getContentResolver().query(CONTENT_URI, All_COLUMN_TABLE, null, null, null);
     }
 
     public Cursor getErrorCodeCounts(int count) {
@@ -107,7 +109,9 @@ public class ErrorDBAdapter {
             }
             cursor.close();
             return stringBuilder.toString();
-        }catch (Exception e){return "";}
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public boolean updateEntry(long _rowIndex, String key, int in) {

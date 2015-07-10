@@ -11,7 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.*;
-import com.kostya.weightcheckadmin.provider.CheckDBAdapter;
+import com.kostya.weightcheckadmin.provider.CheckTable;
+import com.kostya.weightcheckadmin.TaskCommand.ObjectParcel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ActivityListChecks extends ListActivity implements View.OnClickListener {
-    CheckDBAdapter checkTable;
+    CheckTable checkTable;
     private ListView listView;
 
     @Override
@@ -39,7 +40,7 @@ public class ActivityListChecks extends ListActivity implements View.OnClickList
         getWindow().setAttributes(lp);
 
         //ArrayList<Integer> checks = getIntent().getIntegerArrayListExtra("listChecks");
-        checkTable = new CheckDBAdapter(this);
+        checkTable = new CheckTable(this);
         listView = getListView();
 
 
@@ -47,7 +48,7 @@ public class ActivityListChecks extends ListActivity implements View.OnClickList
 
         if ("notifyChecks".equals(getIntent().getAction())) {
             Bundle b = getIntent().getExtras();
-            ArrayList<TaskCommand.ObjParcel> items = b.getParcelableArrayList("listCheckNotify");
+            ArrayList<ObjectParcel> items = b.getParcelableArrayList("listCheckNotify");
             if (items != null) {
                 listNotifySetup(items);
                 listView.setOnItemClickListener(onItemClickListenerNotify);
@@ -80,6 +81,7 @@ public class ActivityListChecks extends ListActivity implements View.OnClickList
             case R.id.buttonBack:
                 onBackPressed();
                 break;
+            default:
         }
     }
 
@@ -93,19 +95,19 @@ public class ActivityListChecks extends ListActivity implements View.OnClickList
         */
         checkTable.deleteCheckIsServer();
 
-        Cursor cursor = checkTable.getAllEntries(CheckDBAdapter.VISIBLE);
+        Cursor cursor = checkTable.getAllEntries(CheckTable.VISIBLE);
         if (cursor == null) {
             return;
         }
         String[] columns = {
-                CheckDBAdapter.KEY_ID,
-                CheckDBAdapter.KEY_DATE_CREATE,
-                CheckDBAdapter.KEY_TIME_CREATE,
-                CheckDBAdapter.KEY_VENDOR,
-                CheckDBAdapter.KEY_WEIGHT_FIRST,
-                CheckDBAdapter.KEY_WEIGHT_SECOND,
-                CheckDBAdapter.KEY_WEIGHT_NETTO,
-                CheckDBAdapter.KEY_PRICE_SUM, CheckDBAdapter.KEY_DIRECT, CheckDBAdapter.KEY_DIRECT, CheckDBAdapter.KEY_DIRECT};
+                CheckTable.KEY_ID,
+                CheckTable.KEY_DATE_CREATE,
+                CheckTable.KEY_TIME_CREATE,
+                CheckTable.KEY_VENDOR,
+                CheckTable.KEY_WEIGHT_FIRST,
+                CheckTable.KEY_WEIGHT_SECOND,
+                CheckTable.KEY_WEIGHT_NETTO,
+                CheckTable.KEY_PRICE_SUM, CheckTable.KEY_DIRECT, CheckTable.KEY_DIRECT, CheckTable.KEY_DIRECT};
 
         int[] to = {
                 R.id.check_id,
@@ -125,7 +127,7 @@ public class ActivityListChecks extends ListActivity implements View.OnClickList
 
     }
 
-    private void listNotifySetup(ArrayList<TaskCommand.ObjParcel> items) {
+    private void listNotifySetup(ArrayList<ObjectParcel> items) {
         ListAdapter itemsAdapter = new ListNotifyAdapter(this, R.layout.list_item_bluetooth, items);
         setListAdapter(itemsAdapter);
         setTitle(getString(R.string.Checks_closed) + getString(R.string.qty) + listView.getCount()); //установить заголовок
@@ -139,16 +141,16 @@ public class ActivityListChecks extends ListActivity implements View.OnClickList
 
             switch (view.getId()) {
                 case R.id.gross:
-                    direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
-                    if (direct == CheckDBAdapter.DIRECT_UP) {
+                    direct = cursor.getInt(cursor.getColumnIndex(CheckTable.KEY_DIRECT));
+                    if (direct == CheckTable.DIRECT_UP) {
                         setViewText((TextView) view, getString(R.string.Tape));
                     } else {
                         setViewText((TextView) view, getString(R.string.Gross));
                     }
                     break;
                 case R.id.tare:
-                    direct = cursor.getInt(cursor.getColumnIndex(CheckDBAdapter.KEY_DIRECT));
-                    if (direct == CheckDBAdapter.DIRECT_DOWN) {
+                    direct = cursor.getInt(cursor.getColumnIndex(CheckTable.KEY_DIRECT));
+                    if (direct == CheckTable.DIRECT_DOWN) {
                         setViewText((TextView) view, getString(R.string.Tape));
                     } else {
                         setViewText((TextView) view, getString(R.string.Gross));
@@ -165,10 +167,10 @@ public class ActivityListChecks extends ListActivity implements View.OnClickList
         }
     }
 
-    public class ListNotifyAdapter extends ArrayAdapter<TaskCommand.ObjParcel> {
+    public class ListNotifyAdapter extends ArrayAdapter<ObjectParcel> {
         final int mLayout;
 
-        public ListNotifyAdapter(Context ctx, int layout, List<TaskCommand.ObjParcel> items) {
+        public ListNotifyAdapter(Context ctx, int layout, List<ObjectParcel> items) {
             super(ctx, layout, items);
             mLayout = layout;
         }

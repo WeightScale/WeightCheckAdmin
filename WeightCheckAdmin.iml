@@ -16,7 +16,8 @@
     <orderEntry type="jdk" jdkName="Android API 15 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="mail" level="project" />
-    <orderEntry type="library" name="bootloader_avr" level="project" />
-    <orderEntry type="library" name="ScaleModule" level="project" />
+    <orderEntry type="library" exported="" name="bootloader_avr" level="project" />
+    <orderEntry type="library" exported="" name="ScaleModule" level="project" />
+    <orderEntry type="library" exported="" name="SMSCommander" level="project" />
   </component>
 </module>
